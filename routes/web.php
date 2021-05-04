@@ -23,8 +23,8 @@ $router->group(['prefix' => 'api'], function () use ($router) {
 
     // Risk Assessment Routes
     $router->group(['prefix' => 'risk'], function () use ($router) {
-        $router->get('intro-questions', ['uses' => 'RiskController@intro']);
-        $router->get('get-assessment', ['uses' => 'RiskController@checkScenario']);
+        $router->get('intro-questions', ['uses' => 'RiskController@introQuestions']);
+        $router->get('get-assessment', ['uses' => 'RiskController@checkScenarios']);
         $router->get('check-risk', ['uses' => 'RiskController@checkRisk']);
     });
 

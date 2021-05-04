@@ -100,7 +100,7 @@ class CommController extends Controller
 		   	]);
 	   }
 
-	   return response()->json(['res_type'=>'error', 'message'=>'Video callroom not found']);
+	   return response()->json(['res_type'=>'error', 'message'=>'Video callroom not found'],404);
     }
 
     public function makeVoiceCall($number)
@@ -109,7 +109,7 @@ class CommController extends Controller
 
         if ($validator->fails())
         {
-            return response()->json(['res_type'=> 'validator_error', 'errors'=>$validator->errors()->all()]);
+            return response()->json(['res_type'=> 'validator_error', 'errors'=>$validator->errors()->all()], 422);
         }
 
         try {
@@ -126,17 +126,17 @@ class CommController extends Controller
 		          );
 
 		        if($call) {
-		          return response()->json(['res_type'=>'success', 'message'=>'Call initiated']);
+		          return response()->json(['res_type'=>'success', 'message'=>'Call initiated'],200);
 		        } else {
-		          return response()->json(['res_type'=>'error', 'message'=>'Unable to initiate call']);
+		          return response()->json(['res_type'=>'error', 'message'=>'Unable to initiate call'],424);
 		        }
 	        }else{
-	        	return response()->json(['res_type'=>'error', 'message'=>'Invalid phone number']);
+	        	return response()->json(['res_type'=>'error', 'message'=>'Invalid phone number'],424);
 	        }
         } catch (Exception $e) {
         	return response()->json(['res_type'=>'error', 'message'=>$e->getMessage()]);
         }catch (RestException $rest) {
-        	return response()->json(['res_type'=>'error', 'message'=>$rest->getMessage()]);
+        	return response()->json(['res_type'=>'error', 'message'=>$rest->getMessage()],424);
     	}
     }
 

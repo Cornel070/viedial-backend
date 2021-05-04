@@ -16,7 +16,7 @@ class ChatController extends Controller
 
         if ($validator->fails())
         {
-            return response()->json(['res_type'=> 'validator_error', 'errors'=>$validator->errors()->all()]);
+            return response()->json(['res_type'=> 'validator_error', 'errors'=>$validator->errors()->all()],422);
         }
 
         $chat_id = $request->chat_id;
@@ -43,7 +43,7 @@ class ChatController extends Controller
 
         broadcast(new MessageSent($request->from_name, $message))->toOthers();
 
-        return response()->json(['res_type'=>'success', 'message'=>$message]);
+        return response()->json(['res_type'=>'success', 'message'=>$message],200);
     }
 
     public function validator(Request $request)
@@ -59,7 +59,7 @@ class ChatController extends Controller
     	$userChats = Chat::where('user1_id', $user_id)->orWhere('user2_id', $user_id)->get();
 
     	if ($userChats->isEmpty()) {
-    		return response()->json(['res_type'=>'error', 'message'=>'No chats found']);
+    		return response()->json(['res_type'=>'error', 'message'=>'No chats found'],404);
     	}
 
     	$chatData = array();
@@ -88,7 +88,7 @@ class ChatController extends Controller
     		array_push($chatData, $data);
     	}
 
-    	return response()->json(['res_type'=>'success', 'chats'=>$chatData]);
+    	return response()->json(['res_type'=>'success', 'chats'=>$chatData],200);
     }
 
     public function allChatMessages($id) 
@@ -96,14 +96,14 @@ class ChatController extends Controller
         $chat = Chat::find($id);
 
         if (!$chat) {
-            return response()->json(['res_type'=>'error', 'message'=>'Chat does not exist']);
+            return response()->json(['res_type'=>'error', 'message'=>'Chat does not exist'],404);
         }
 
         if (!$chat->messages) {
-            return response()->json(['res_type'=>'error', 'message'=>'No messages found']);
+            return response()->json(['res_type'=>'error', 'message'=>'No messages found'],204);
         }
 
-        return response()->json(['res_type'=>'success', 'message'=>$chat->messages]);
+        return response()->json(['res_type'=>'success', 'message'=>$chat->messages],200);
     }
 
     /* 
@@ -115,7 +115,7 @@ class ChatController extends Controller
         $msg = Message::find($id);
 
         if (!$msg) {
-            return response()->json(['res_type'=>'error', 'message'=>'Message does not exist']);
+            return response()->json(['res_type'=>'error', 'message'=>'Message does not exist'],404);
         }
 
         $msg->delete();
@@ -133,7 +133,7 @@ class ChatController extends Controller
         $chat = Chat::find($id);
 
         if (!$chat) {
-            return response()->json(['res_type'=>'error', 'message'=>'Chat does not exist']);
+            return response()->json(['res_type'=>'error', 'message'=>'Chat does not exist'],404);
         }
 
         $chat->delete();

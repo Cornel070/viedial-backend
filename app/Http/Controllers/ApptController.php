@@ -14,14 +14,14 @@ class ApptController extends Controller
 
         if ($validator->fails())
         {
-            return response()->json(['res_type'=> 'validator_error', 'errors'=>$validator->errors()->all()]);
+            return response()->json(['res_type'=> 'validator_error', 'errors'=>$validator->errors()->all()],422);
         }
 
         $appt = Appt::create($request->all());
 
         broadcast(new Appointment($appt))->toOthers();
 
-        return response()->json(['res_type'=>'success', 'message'=>'Appointment request sent']);
+        return response()->json(['res_type'=>'success', 'message'=>'Appointment request sent'],200);
     }
 
     public function validateAppt($request)
