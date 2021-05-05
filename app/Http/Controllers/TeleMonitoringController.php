@@ -8,6 +8,13 @@ use Carbon\Carbon;
 
 class TeleMonitoringController extends Controller
 {
+    protected $user;
+
+    public function __construct()
+    {
+        $this->user = auth()->user();
+    }
+
     public function saveReading(Request $request)
     {
         $validator = $this->validateReading($request);
@@ -19,12 +26,12 @@ class TeleMonitoringController extends Controller
 
     	$reading_type = $request->reading_type;
 
-    	$tele_record = Telemonitoring::where('created_at', Carbon::today())
-    									->where('user_id', $request->user_id)
+    	$tele_record = Telemonitoring::whereDate('created_at', Carbon::today())
+    									->where('user_id', $this->user->id)
     									->first();
     	if (!$tele_record) {
     		$tele_record = new Telemonitoring;
-    		$tele_record->user_id = $request->user_id;
+    		$tele_record->user_id = $this->user->id;
     	}
 
     	switch ($reading_type) {
@@ -51,11 +58,9 @@ class TeleMonitoringController extends Controller
         $msg = [
             'reading_type.required' => 'The Reading Type is required',
             'reading_type.string'   => 'The Reading Type must be  a string',
-            'user_id.required'      => 'The user user id is required',
         ];
         return validator()->make($request->all(), [
             'reading_type' => 'required|string',
-            'user_id'      => 'required'
         ], $msg);
     }
 
@@ -76,7 +81,7 @@ class TeleMonitoringController extends Controller
     		$level = 'Normal';
             $msg = 'Your blood pressure is on a normal levels.';
 
-    	}elseif ($record->blood_pressure_systolic > 120 && $record->blood_pressure_systolic < 141 && $record->blood_pressure_diastolic > 80 && $record->blood_pressure_diastolic < 91) {
+    	}elseif ($record->blood_pressure_systolic > 120 && $record->blood_pressure_systolic < 141 && $record->blood_pressure_diastolic >= 80 && $record->blood_pressure_diastolic < 91) {
             $level = 'Slightly High';
             $msg = 'Your blood pressure is slightly high. You need to watch it.';
 
@@ -230,8 +235,7 @@ class TeleMonitoringController extends Controller
             'reading_val.integer'   => 'The reading value must be a valid number',
         ];
         return validator()->make($request->all(), [
-            'bs_unit'   => 'required',
-            'bs_type'   => 'required',
+            'w_unit'   => 'required',
             'reading_val' => 'required|between:0,99.99'
         ], $msg);
     }
@@ -239,5 +243,25 @@ class TeleMonitoringController extends Controller
     public function poundToKg($val)
     {
         return (int) $val * 0.453592;
+    }
+
+    public function todayReadings(Request $request)
+    {
+        $todays = Telemonitoring::whereDate('created_at', Carbon::today())->where('user_id', $this->user->id)->get();
+
+        if ($todays->isEmpty()) {
+            return response()->json(['res_type'=> 'not found', 'message'=>'No readings for today'], 404);
+        }
+        return response()->json(['res_type'=> 'success', 'todays_readings'=>$todays]);
+    }
+
+    public function allReadings()
+    {
+        $readings = Telemonitoring::where('user_id', $this->user->id)->latest()->get();
+
+        if ($readings->isEmpty()) {
+            return response()->json(['res_type'=> 'not found', 'message'=>'No readings found'], 404);
+        }
+        return response()->json(['res_type'=> 'success', 'all_readings'=>$readings]);
     }
 }

@@ -11,15 +11,11 @@ use Illuminate\Broadcasting\PresenceChannel;
 use Illuminate\Broadcasting\InteractsWithSockets;
 use Illuminate\Contracts\Broadcasting\ShouldBroadcast;
 
-class Appointment extends Event
+class ApptAccepted extends Event
 {
 	use InteractsWithSockets, SerializesModels;
    // use Dispatchable
-    /**
-     * Create a new event instance.
-     *
-     * @return void
-     */
+
     public $appt;
 
     public function __construct($appt)
@@ -29,6 +25,6 @@ class Appointment extends Event
 
     public function broadcastOn()
     {
-    	return new PrivateChannel('appt_request_'.$this->appt->recipient_id);
+    	return new PrivateChannel('appt_accepted_'.$this->appt->requestee_id);
     }
 }

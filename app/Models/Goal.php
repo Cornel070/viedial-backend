@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 class Goal extends Model
 {
     protected $fillable = [
-    	'title', 'set_weight', 'user_id',
+    	'title', 'current_weight', 'user_id',
     	'target_weight', 'deficit_weight',
     	'length', 'weekly_deficit', 'status'
     ];
@@ -23,11 +23,16 @@ class Goal extends Model
 
     public  function setCurrentWeightAttribute($val)
     {
-    	return $this->attributes['set_weight'] = (int) $val;
+    	return $this->attributes['current_weight'] = (int) $val;
     }
 
-     public  function setTargetWeightAttribute($val)
+    public  function setTargetWeightAttribute($val)
     {
     	return $this->attributes['target_weight'] = (int) $val;
+    }
+
+    public  function setWeeklyDeficitAttribute($val)
+    {
+        return $this->attributes['weekly_deficit'] = (float) $val;
     }
 }

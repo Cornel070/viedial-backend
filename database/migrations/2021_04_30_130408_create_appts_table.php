@@ -18,8 +18,11 @@ class CreateApptsTable extends Migration
             $table->date('appt_date');
             $table->string('appt_time');
             $table->string('reason');
-            $table->integer('requested_by');
-            $table->integer('accepted_by')->nullable();
+            $table->integer('requestee_id');
+            $table->string('requestee_name');
+            $table->string('recipient_name');
+            $table->integer('recipient_id');
+            $table->string('status')->default('Pending');
             $table->timestamps();
         });
     }

@@ -49,8 +49,8 @@ class MessageSent extends Event
     public function broadcastOn()
     {
     	$channels = [];
-    	$channels[] = new PrivateChannel('user_chat_'.$message->from);
-    	$channels[] = new PrivateChannel('user_chat_'.$message->to);
+    	$channels[] = new PrivateChannel('user_chat_'.$message->from_id);
+    	$channels[] = new PrivateChannel('user_chat_'.$message->to_id);
 
         return $channels;
     }

@@ -18,20 +18,22 @@ $router->group(['prefix' => 'api'], function () use ($router) {
     $router->group(['prefix' => 'auth'], function () use ($router) {
         $router->post('login', ['uses' => 'AuthController@login']);
         $router->post('register', ['uses' => 'AuthController@register']);
-        $router->get('verify', ['uses' => 'AuthController@verifyFromEmail']);
+        $router->get('verify/{code}', ['uses' => 'AuthController@verifyFromEmail']);
     });
 
     // Risk Assessment Routes
     $router->group(['prefix' => 'risk'], function () use ($router) {
         $router->get('intro-questions', ['uses' => 'RiskController@introQuestions']);
         $router->get('get-assessment', ['uses' => 'RiskController@checkScenarios']);
-        $router->get('check-risk', ['uses' => 'RiskController@checkRisk']);
+        $router->post('check-risk', ['uses' => 'RiskController@checkRisk']);
     });
 
     $router->group(['middleware' => ['auth']], function () use ($router) {
         // Tele-monitoring Routes
         $router->group(['prefix' => 'tele'], function () use ($router) {
             $router->post('save-reading', ['uses' => 'TeleMonitoringController@saveReading']);
+            $router->get('today-readings', ['uses' => 'TeleMonitoringController@todayReadings']);
+            $router->get('all-readings', ['uses' => 'TeleMonitoringController@allReadings']);
         });
 
         // Goal Setting Routes
@@ -39,7 +41,7 @@ $router->group(['prefix' => 'api'], function () use ($router) {
             $router->post('set-goal', ['uses' => 'GoalController@saveGoal']);
             $router->get('/{id}', ['uses' => 'GoalController@showGoal']);
             $router->post('/{id}/update', ['uses' => 'GoalController@updateGoal']);
-            $router->get('/{user_id}/all', ['uses' => 'GoalController@allGoals']);
+            $router->get('/', ['uses' => 'GoalController@allGoals']);
             $router->delete('/{id}/delete', ['uses' => 'GoalController@deleteGoal']);
         });
 
@@ -50,18 +52,20 @@ $router->group(['prefix' => 'api'], function () use ($router) {
             $router->get('make-vid-call/{vendor_id}', ['uses' => 'CommController@makeVidCall']);
             $router->get('join-vid-call/{roomName}', ['uses' => 'CommController@joinVidMeeting']);
             // Voice Calls
-            $router->get('voice-call/{number}', ['uses' => 'CommController@makeVoiceCall']);
+            $router->get('voice-call/{number}', ['uses' => 'CommController@makeVoiceCall']);//research how to mmake in-app calls
             // Direct Chat
-            $router->post('send-chat', ['uses' => 'CommController@sendDirectChat']);
-            $router->get('all-chats/{user_id}', ['uses' => 'CommController@viewAllChats']);
-            $router->get('chat/{id}/messages', ['uses' => 'CommController@allChatMessages']);
-            $router->delete('delete-message/{id}', ['uses' => 'CommController@deleteMessage']);
-            $router->delete('delete-chat/{id}', ['uses' => 'CommController@deleteChat']);
+            $router->post('send-chat', ['uses' => 'ChatController@sendDirectChat']);
+            $router->get('all-chats', ['uses' => 'ChatController@viewAllChats']);
+            $router->get('chat/{id}/messages', ['uses' => 'ChatController@allChatMessages']);
+            $router->delete('delete-message/{id}', ['uses' => 'ChatController@deleteMessage']);
+            $router->delete('delete-chat/{id}', ['uses' => 'ChatController@deleteChat']);
             // Multi deletes
-            $router->post('multi-delete-messages', ['uses' => 'CommController@multiDeleteMsgs']);
-            $router->post('multi-delete-chats', ['uses' => 'CommController@multiDeleteChats']);
+            $router->post('multi-delete-messages', ['uses' => 'ChatController@multiDeleteMsgs']);
+            $router->post('multi-delete-chats', ['uses' => 'ChatController@multiDeleteChats']);
             // Appointment Routes
-            $router->post('set-appointment', ['uses' => 'CommController@setAppt']);
+            $router->post('send-appt-request', ['uses' => 'ApptController@setAppt']);
+            $router->get('appt/{id}/accept', ['uses' => 'ApptController@acceptApptRequest']);
+            $router->post('appt/{id}/decline', ['uses' => 'ApptController@declineApptRequest']);
         });
     });
 });

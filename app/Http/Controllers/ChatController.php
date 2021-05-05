@@ -10,6 +10,13 @@ use App\Models\Message;
 
 class ChatController extends Controller
 {
+    protected $user;
+
+    public function __construct()
+    {
+        $this->user = auth()->user();
+    }
+
     public function sendDirectChat(Request $request)
     {
     	$validator = $this->validator($request);
@@ -20,43 +27,52 @@ class ChatController extends Controller
         }
 
         $chat_id = $request->chat_id;
+        $to_user = User::find($request->to_id);
+
+        if (!$to_user) {
+            return response()->json(['res_type'=>'Not found', 'message'=>'Recipient user does not exist'],404);
+        }
 
         if (!$chat_id) {
             $chat = New Chat;
-            $chat->user1_id = $request->from_id;
-            $chat->user1_name = $request->from_name;
-            $chat->user2_id = $request->to_id;
-            $chat->user2_name = $request->to_name;
+            $chat->user1_id = $this->user->id;
+            $chat->user1_name = $this->user->name;
+            $chat->user2_id = $to_user->id;
+            $chat->user2_name = $to_user->name;
             $chat->save();
 
             $chat_id  = $chat->id;
         }
 
         $message = new Message;
-        $message->from_id = $request->from_id;
-        $message->from_name = $request->from_name;
-        $message->to_id = $request->to_id;
-        $message->to_name = $request->to_name;
+        $message->from_id = $this->user->id;
+        $message->from_name = $this->user->name;
+        $message->to_id = $to_user->id;
+        $message->to_name = $to_user->name;
         $message->message_text = $request->message_text;
         $message->chat_id = $chat_id;
         $message->save();
 
-        broadcast(new MessageSent($request->from_name, $message))->toOthers();
+        broadcast(new MessageSent($message->from_name, $message))->toOthers();
 
         return response()->json(['res_type'=>'success', 'message'=>$message],200);
     }
 
     public function validator(Request $request)
     {
+        $msg = [
+            'to_id.required'        => 'Please select a recipient',
+            'message_text.required' => 'Please enter a message',
+        ];
         return validator()->make($request->all(), [
-            'to_id'   => 'required|integer',
+            'to_id'   => 'required',
             'message_text'   => 'required',
-        ]);
+        ], $msg);
     }
 
-    public function viewAllChats($user_id)
+    public function viewAllChats()
     {
-    	$userChats = Chat::where('user1_id', $user_id)->orWhere('user2_id', $user_id)->get();
+    	$userChats = Chat::where('user1_id', $this->user->id)->orWhere('user2_id', $this->user->id)->get();
 
     	if ($userChats->isEmpty()) {
     		return response()->json(['res_type'=>'error', 'message'=>'No chats found'],404);
@@ -103,7 +119,7 @@ class ChatController extends Controller
             return response()->json(['res_type'=>'error', 'message'=>'No messages found'],204);
         }
 
-        return response()->json(['res_type'=>'success', 'message'=>$chat->messages],200);
+        return response()->json(['res_type'=>'success', 'messages'=>$chat->messages],200);
     }
 
     /* 

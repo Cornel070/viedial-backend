@@ -17,7 +17,7 @@ class CreateGoalsTable extends Migration
             $table->id();
             $table->unsignedBigInteger('user_id');
             $table->string('title');
-            $table->integer('set_weight');
+            $table->integer('current_weight');
             $table->integer('target_weight');
             $table->integer('deficit_weight');
             $table->float('weekly_deficit');

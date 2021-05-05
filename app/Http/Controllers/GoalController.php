@@ -7,27 +7,34 @@ use App\Models\Goal;
 
 class GoalController extends Controller
 {
+    protected $user;
+
+    public function __construct()
+    {
+        $this->user = auth()->user();
+    }
+
     public function saveGoal(Request $request)
     {
-    	$validator = $this->validator($request);
+    	$validator = $this->validateGoal($request);
 
         if ($validator->fails())
         {
-            return response()->json(['res_type'=> 'validator_error', 'errors'=>$validator->errors()->all()],404);
+            return response()->json(['res_type'=> 'validator_error', 'errors'=>$validator->errors()->all()],422);
         }
 
         $weekly_deficit  = $request->weekly_deficit??$this->suggestWeeklyDeficit($request);
         $deficit_weight  = $this->setDeficitWeight($request);
-        $goal_span		 = $this->setGoalSpan($deficit_weight, $weekly_deficit);
+        $goal_span		 = $this->setGoalSpan($deficit_weight, $weekly_deficit, true);
 
         $data = [
         	'title' 		  	=> $request->title,
-        	'set_weight'	    => $request->set_weight,
+        	'current_weight'	=> $request->current_weight,
         	'target_weight'		=> $request->target_weight,
         	'deficit_weight'	=> $deficit_weight,
         	'weekly_deficit'	=> $weekly_deficit,
         	'length'			=> $goal_span,
-	        'user_id'			=> $request->user_id
+	        'user_id'			=> $this->user->id
         ];
 
         $goal = Goal::create($data);
@@ -35,15 +42,22 @@ class GoalController extends Controller
         return response()->json(['res_type'=> 'success', 'goal'=> $goal]);
     }
 
-    public function validator(Request $request)
+    public function validateGoal(Request $request)
     {
+        $msg = [
+            'current_weight.required'=>'Your current weight is required',
+            'current_weight.integer' => 'Your current weight must be a valid number',
+            'target_weight.required' => 'The target weight is required',
+            'target_weight.required' => 'The target weight must be a valid number',
+            'weekly_deficit.integer'=> 'please set a weekly weight deficit',
+            'title.required'        => 'A title is required for the goal'
+        ];
         return validator()->make($request->all(), [
-            'set_weight'     => 'required|integer',
+            'current_weight'     => 'required|integer',
             'target_weight'  => 'required|integer',
-            'weekly_deficit' => 'integer',
+            'weekly_deficit' => 'required',
             'title'			 => 'required|string',
-            'user_id'		 => 'required|integer',
-        ]);
+        ],$msg);
     }
 
     public function suggestWeeklyDeficit()
@@ -51,14 +65,20 @@ class GoalController extends Controller
     	return 1.0;
     }
 
-    public function setDeficitWeight(request $request)
+    public function setDeficitWeight(Request $request)
     {
-    	return $request->set_weight - $request->target_weight;
+    	return (int) $request->current_weight - (int) $request->target_weight;
     }
 
-    public function setGoalSpan($deficit_weight, $weekly_deficit)
+    public function setGoalSpan($deficit_weight, $weekly_deficit, $within = false)
     {
-    	return ceil($deficit_weight/$weekly_deficit);
+        $weeks = ceil($deficit_weight/$weekly_deficit);
+
+    	if ($within) {
+            return $weeks;
+        }
+
+        return response()->json(['res_type'=> 'success', 'weeks'=> $weeks, 'days'=> $weeks*7]);
     }
 
     public function showGoal($id)
@@ -76,7 +96,7 @@ class GoalController extends Controller
     	$goal = Goal::find($id);
 
     	if ($goal) {
-    		$validator = $this->validator($request);
+    		$validator = $this->validateGoal($request);
 
 	        if ($validator->fails())
 	        {
@@ -85,16 +105,16 @@ class GoalController extends Controller
 
 		    $weekly_deficit = $request->weekly_deficit??$this->suggestDailyDeficit($request);
 	        $deficit_weight = $this->setDeficitWeight($request);
-	        $goal_span		= $this->setGoalSpan($deficit_weight, $weekly_deficit);
+	        $goal_span		= $this->setGoalSpan($deficit_weight, $weekly_deficit, true);
 
 	        $data = [
 	        	'title' 		  	=> $request->title,
-	        	'set_weight'	    => $request->set_weight,
+	        	'current_weight'	=> $request->current_weight,
 	        	'target_weight'		=> $request->target_weight,
 	        	'deficit_weight'	=> $deficit_weight,
 	        	'weekly_deficit'	=> $weekly_deficit,
 	        	'length'			=> $goal_span,
-	        	'user_id'			=> $request->user_id
+	        	'user_id'			=> $this->user->id
 	        ];
 
 	        $goal->update($data);
@@ -104,9 +124,9 @@ class GoalController extends Controller
     	return response()->json(['res_type'=> 'error', 'message'=> 'Goal not found'],404);
     }
 
-    public function allGoals($user_id)
+    public function allGoals()
     {
-    	$goals = Goal::where('user_id', $user_id)->get();
+    	$goals = Goal::where('user_id', $this->user->id)->get();
     	if ($goals->isEmpty()) {
     		return response()->json(['res_type'=> 'error', 'message'=> 'No goals found'],204);
     	}
@@ -119,7 +139,7 @@ class GoalController extends Controller
     	$goal = Goal::find($id);
     	if ($goal) {
     		$goal->delete();
-    		return response()->json(['res_type'=> 'success']);
+    		return response()->json(['res_type'=> 'success', 'message'=>'Goal deleted']);
     	}
     	return response()->json(['res_type'=> 'error', 'message'=> 'Goal not found'],404);
     }

@@ -121,9 +121,9 @@ class AuthController extends Controller
         return $code;
     }
 
-    public function verifyFromEmail(Request $request)
+    public function verifyFromEmail($code)
     {   
-        $verified = VerifyCode::where('verification_code', $request->code)->first();
+        $verified = VerifyCode::where('verification_code', $code)->first();
 
         if ($verified) {
             $user = User::find($verified->user_id);

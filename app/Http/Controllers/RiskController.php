@@ -9,7 +9,7 @@ use App\Models\Option;
 /**
  * 
  */
-class QuestionController extends Controller
+class RiskController extends Controller
 {
 	public function addQuestion(Request $request)
 	{
@@ -110,12 +110,18 @@ class QuestionController extends Controller
             array_push($q, $qts); 
         }
 
-        return response()->json(['res_type'=> 'success', 'questions'=>$questions]);
+        if ($type === 'diabetes') {
+            $assessment_type = 'Type 2 Diabetes';
+        }else{
+            $assessment_type = 'Cardiovascular Disease';
+        }
+
+        return response()->json(['res_type'=> 'success', 'assessment_type'=> $assessment_type, 'questions'=>$questions]);
     }
 
     public function checkRisk(Request $request)
     {
-        $assessment = $request->assessment;
+        $assessment = $request->risk_assessment_type;
         $score      = $request->score;
         $gender     = strtolower($request->gender);
 
@@ -140,7 +146,7 @@ class QuestionController extends Controller
             case ($score < 11 && $gender === 'male'):
                 return response()->json([
                     'res_type'  => 'success',
-                    'assessment'=> 'Cardiovascular Disease', 
+                    'assessment_type'=> 'Cardiovascular Disease', 
                     'score'     => $score,
                     'risk_level'=> 'Low'
                 ]);
@@ -149,7 +155,7 @@ class QuestionController extends Controller
             case ($score < 13 && $gender === 'female'):
                 return response()->json([
                     'res_type'  => 'success',
-                    'assessment'=> 'Cardiovascular Disease', 
+                    'assessment_type'=> 'Cardiovascular Disease', 
                     'score'     => $score,
                     'risk_level'=> 'Low'
                 ]);
@@ -158,7 +164,7 @@ class QuestionController extends Controller
             case ($score > 10  && $score < 15 && $gender === 'male'):
                 return response()->json([
                     'res_type'  => 'success',
-                    'assessment'=> 'Cardiovascular Disease', 
+                    'assessment_type'=> 'Cardiovascular Disease', 
                     'score'     => $score,
                     'risk_level'=> 'Intermediate'
                 ]);
@@ -167,7 +173,7 @@ class QuestionController extends Controller
             case ($score > 12  && $score < 18 && $gender === 'female'):
                 return response()->json([
                     'res_type'  => 'success',
-                    'assessment'=> 'Cardiovascular Disease', 
+                    'assessment_type'=> 'Cardiovascular Disease', 
                     'score'     => $score,
                     'risk_level'=> 'Intermediate'
                 ]);
@@ -176,7 +182,7 @@ class QuestionController extends Controller
             case ($score > 14 && $gender === 'male'):
                 return response()->json([
                     'res_type'  => 'success',
-                    'assessment'=> 'Cardiovascular Disease', 
+                    'assessment_type'=> 'Cardiovascular Disease', 
                     'score'     => $score,
                     'risk_level'=> 'High'
                 ]);
@@ -185,7 +191,7 @@ class QuestionController extends Controller
             case ($score > 17 && $gender === 'female'):
                 return response()->json([
                     'res_type'  => 'success',
-                    'assessment'=> 'Cardiovascular Disease',
+                    'assessment_type'=> 'Cardiovascular Disease',
                     'score'     => $score,
                     'risk_level'=> 'High'
                 ]);
@@ -194,7 +200,7 @@ class QuestionController extends Controller
             default:
                 return response()->json([
                     'res_type'  => 'success',
-                    'assessment'=> 'Cardiovascular Disease', 
+                    'assessment_type'=> 'Cardiovascular Disease', 
                     'score'     => $score,
                     'risk_level'=> 'Low'
                 ]);
@@ -208,7 +214,7 @@ class QuestionController extends Controller
             case ($score < 7):
                 return response()->json([
                 'res_type'  => 'success',
-                'assessment'=> 'Type 2 Diabetes', 
+                'assessment_type'=> 'Type 2 Diabetes', 
                 'score'     => $score,
                 'risk_level'=> 'Low'
             ]);
@@ -217,7 +223,7 @@ class QuestionController extends Controller
             case ($score > 6 && $score < 12):
                 return response()->json([
                 'res_type'  => 'success',
-                'assessment'=> 'Type 2 Diabetes', 
+                'assessment_type'=> 'Type 2 Diabetes', 
                 'score'     => $score,
                 'risk_level'=> 'Slightly elevated'
             ]);
@@ -226,7 +232,7 @@ class QuestionController extends Controller
             case ($score > 11 && $score < 15):
                 return response()->json([
                 'res_type'  => 'success',
-                'assessment'=> 'Type 2 Diabetes', 
+                'assessment_type'=> 'Type 2 Diabetes', 
                 'score'     => $score,
                 'risk_level'=> 'Moderate'
             ]);
@@ -235,7 +241,7 @@ class QuestionController extends Controller
             case ($score > 14 && $score < 21):
                 return response()->json([
                 'res_type'  => 'success',
-                'assessment'=> 'Type 2 Diabetes', 
+                'assessment_type'=> 'Type 2 Diabetes', 
                 'score'     => $score,
                 'risk_level'=> 'High'
             ]);
@@ -244,7 +250,7 @@ class QuestionController extends Controller
             case ($score > 20):
                 return response()->json([
                 'res_type'  => 'success',
-                'assessment'=> 'Type 2 Diabetes', 
+                'assessment_type'=> 'Type 2 Diabetes', 
                 'score'     => $score,
                 'risk_level'=> 'Very High'
             ]);
@@ -253,7 +259,7 @@ class QuestionController extends Controller
             default:
                 return response()->json([
                 'res_type'  => 'success',
-                'assessment'=> 'Type 2 Diabetes', 
+                'assessment_type'=> 'Type 2 Diabetes', 
                 'score'     => $score,
                 'risk_level'=> 'Low'
             ]);
