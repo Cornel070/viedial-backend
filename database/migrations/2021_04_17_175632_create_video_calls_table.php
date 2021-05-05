@@ -21,7 +21,6 @@ class CreateVideoCallsTable extends Migration
             $table->string('room_name');
             $table->timestamps();
             $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade')->onUpdate('no action');
-            $table->foreign('vendor_id')->references('id')->on('vendors')->onDelete('cascade')->onUpdate('no action');
         });
     }
 
