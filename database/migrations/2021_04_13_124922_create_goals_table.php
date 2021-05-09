@@ -19,8 +19,10 @@ class CreateGoalsTable extends Migration
             $table->string('title');
             $table->integer('current_weight');
             $table->integer('target_weight');
+            $table->integer('calorie_balance');
             $table->integer('deficit_weight');
             $table->float('weekly_deficit');
+            $table->float('weekly_calorie_def');
             $table->integer('length');
             $table->integer('weight_burned')->default(0);
             $table->string('status')->default('in progress');

@@ -8,8 +8,8 @@ class Goal extends Model
 {
     protected $fillable = [
     	'title', 'current_weight', 'user_id',
-    	'target_weight', 'deficit_weight',
-    	'length', 'weekly_deficit', 'status'
+    	'target_weight', 'calorie_balance', 'deficit_weight',
+    	'length', 'weekly_deficit', 'weekly_calorie_def', 'status'
     ];
 
     public function getLengthAttribute($val)
