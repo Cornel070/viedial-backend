@@ -67,5 +67,27 @@ $router->group(['prefix' => 'api'], function () use ($router) {
             $router->get('appt/{id}/accept', ['uses' => 'ApptController@acceptApptRequest']);
             $router->post('appt/{id}/decline', ['uses' => 'ApptController@declineApptRequest']);
         });
+
+        // Educational Curriculum Routes
+        $router->group(['prefix' => 'edu'], function () use ($router) {
+            //Series
+            $router->post('/', ['uses' => 'EduController@index']);
+            $router->get('series/{id}/videos', ['uses' => 'EduController@seriesVideos']);
+            $router->get('series/{id}/comments', ['uses' => 'EduController@seriesComments']);
+            $router->get('series/{id}/like', ['uses' => 'EduController@likeSeries']);
+            $router->get('series/{id}/dislike', ['uses' => 'EduController@dislikeSeries']);
+            $router->post('series/{id}/comment', ['uses' => 'EduController@commentOnSeries']);
+            //Videos
+            $router->post('video/{id}/comment', ['uses' => 'EduController@commentOnVideo']);
+            $router->get('video/{id}/comments', ['uses' => 'EduController@videoComments']);
+            $router->get('video/{id}/like', ['uses' => 'EduController@likeVideo']);
+            $router->get('video/{id}/dislike', ['uses' => 'EduController@dislikeVideo']);
+        });
+
+        // Educational Curriculum Routes
+        $router->group(['prefix' => 'phy'], function () use ($router) {
+            //Series
+            $router->post('/', ['uses' => 'PhysicalController@index']);
+        });
     });
 });
