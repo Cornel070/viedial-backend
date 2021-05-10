@@ -33,7 +33,8 @@ class EduController extends Controller
     					'videos_count'	=> $serie->videos->count(),
     					'likes'		=> $serie->likes,
     					'dislikes'	=> $serie->dislikes,
-    					'comments_count'  => $serie->comments->count()
+    					'comments_count'  => $serie->comments->count(),
+                        'created_at'      => $serie->created_at,
     				];
     				array_push($lecture_series, $data);
     			}
@@ -50,7 +51,8 @@ class EduController extends Controller
     					'videos_count'	=> $serie->videos->count(),
     					'likes'		=> $serie->likes,
     					'dislikes'	=> $serie->dislikes,
-    					'comments_count'  => $serie->comments->count()
+    					'comments_count'  => $serie->comments->count(),
+                        'created_at'      => $serie->created_at,
     				];
     				array_push($lecture_series, $data);
     			}
@@ -67,7 +69,8 @@ class EduController extends Controller
     					'videos_count'	=> $serie->videos->count(),
     					'likes'		=> $serie->likes,
     					'dislikes'	=> $serie->dislikes,
-    					'comments_count'  => $serie->comments->count()
+    					'comments_count'  => $serie->comments->count(),
+                        'created_at'      => $serie->created_at,
     				];
     				array_push($lecture_series, $data);
     			}
@@ -101,7 +104,8 @@ class EduController extends Controller
     			'video_url'	 => $video->video_url,
     			'likes'		 => $vide0->likes,
     			'dislikes'	 => $video->dislikes,
-    			'comments_count'=> $video->comments->count()
+    			'comments_count'=> $video->comments->count(),
+                'created_at'      => $video->created_at,
     		];
     		array_push($vidData, $data);
     	}
@@ -128,7 +132,8 @@ class EduController extends Controller
     			'id'		 => $comm->id,
     			'serie_id'	 => $comm->serie_id,
     			'by'	 	 => $comm->user->annon_name,
-    			'comment_text'	 => $comm->comment_text
+    			'comment_text'	 => $comm->comment_text,
+                'created_at'      => $comm->created_at,
     		];
     		array_push($commData, $data);
     	}
@@ -142,7 +147,7 @@ class EduController extends Controller
 
         if ($validator->fails())
         {
-            return response()->json(['res_type'=> 'validator_error', 'errors'=>$validator->errors()->all()]);
+            return response()->json(['res_type'=> 'validator_error', 'errors'=>$validator->errors()->all()],422);
         }
 
         $comment = New SerieComment;
@@ -198,7 +203,7 @@ class EduController extends Controller
 
         if ($validator->fails())
         {
-            return response()->json(['res_type'=> 'validator_error', 'errors'=>$validator->errors()->all()]);
+            return response()->json(['res_type'=> 'validator_error', 'errors'=>$validator->errors()->all()],422);
         }
 
         $comment = New VideoComment;
@@ -229,7 +234,8 @@ class EduController extends Controller
     			'id'		 => $comm->id,
     			'video_id'	 => $comm->video_id,
     			'by'	 	 => $comm->user->annon_name,
-    			'comment_text'	 => $comm->comment_text
+    			'comment_text'	 => $comm->comment_text,
+                'created_at'      => $comm->created_at,
     		];
     		array_push($commData, $data);
     	}

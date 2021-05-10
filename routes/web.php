@@ -84,6 +84,18 @@ $router->group(['prefix' => 'api'], function () use ($router) {
             $router->get('video/{id}/dislike', ['uses' => 'EduController@dislikeVideo']);
         });
 
+        // Viedial Community Routes
+        $router->group(['prefix' => 'cmt'], function () use ($router) {
+            //Post
+            $router->post('make-post', ['uses' => ' CommunityController@makePost']);
+            $router->get('posts', ['uses' => ' CommunityController@allPosts']);
+            $router->get('post/{id}', ['uses' => ' CommunityController@singlePost']);
+            $router->post('post/{id}/comment', ['uses' => ' CommunityController@commentOnPost']);
+            $router->get('post/{id}/comments', ['uses' => ' CommunityController@getPostComments']);
+            $router->post('comment/{id}/reply', ['uses' => ' CommunityController@sendReply']);
+            $router->get('comment/{id}', ['uses' => ' CommunityController@singleComment']);
+        });
+
         // Educational Curriculum Routes
         $router->group(['prefix' => 'phy'], function () use ($router) {
             //Series
