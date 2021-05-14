@@ -209,6 +209,8 @@ class CommunityController extends Controller
     		return response()->json(['res_type'=> 'Not found', 'message'=>'Comment not found.'],404);
     	}
 
+    	$commData = [];
+
     	if ($comm->replies->count() > 0) {
 	    	//get replies
 		    $replyData = [];
@@ -224,7 +226,7 @@ class CommunityController extends Controller
 		    	array_push($replyData, $replies);
 		    }
 	    }else{
-	    	$replyData = 'No comments';
+	    	$replyData = 'No replies';
 	    }
 
     	$data = [
@@ -232,10 +234,10 @@ class CommunityController extends Controller
     		'by'			=> $comm->user->annon_name,
     		'comment_text'	=> $comm->reply_text,
     		'replies'		=> $replyData,
-    		'created_at'	=>$comm->created_at
+    		'created_at'	=> $comm->created_at
     	];
-    	array_push($replyData, $data);
+    	array_push($commData, $data);
 
-    	return response()->json(['res_type'=>'success', 'comment'=>$replyData]);
+    	return response()->json(['res_type'=>'success', 'comment'=>$commData]);
     }
 }

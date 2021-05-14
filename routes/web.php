@@ -100,6 +100,16 @@ $router->group(['prefix' => 'api'], function () use ($router) {
         $router->group(['prefix' => 'phy'], function () use ($router) {
             //Series
             $router->post('/', ['uses' => 'PhysicalController@index']);
+            $router->get('series/{id}/videos', ['uses' => 'PhysicalController@seriesWorkouts']);
+            $router->get('series/{id}/comments', ['uses' => 'PhysicalController@seriesComments']);
+            $router->get('series/{id}/like', ['uses' => 'PhysicalController@likeSeries']);
+            $router->get('series/{id}/dislike', ['uses' => 'PhysicalController@dislikeSeries']);
+            $router->post('series/{id}/comment', ['uses' => 'PhysicalController@commentOnPhy']);
+            //Videos
+            $router->post('video/{id}/comment', ['uses' => 'PhysicalController@commentOnWorkout']);
+            $router->get('video/{id}/comments', ['uses' => 'PhysicalController@workoutComments']);
+            $router->get('video/{id}/like', ['uses' => 'PhysicalController@likeVideo']);
+            $router->get('video/{id}/dislike', ['uses' => 'PhysicalController@dislikeVideo']);
         });
     });
 });

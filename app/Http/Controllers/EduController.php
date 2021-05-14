@@ -121,7 +121,7 @@ class EduController extends Controller
     		return response()->json(['res_type'=>'Not found', 'message'=>'Lecture series not found.'],404);
     	}
 
-    	if ($serie->videos->isEmpty()) {
+    	if ($serie->comments->isEmpty()) {
     		return response()->json(['res_type'=>'Not found', 'message'=>'No comments yet for this lecture series.'],404);
     	}
 
@@ -219,11 +219,11 @@ class EduController extends Controller
     {
     	$video = Video::find($id);
 
-    	if (!$serie) {
+    	if (!$video) {
     		return response()->json(['res_type'=>'Not found', 'message'=>'Video not found.'],404);
     	}
 
-    	if ($serie->videos->isEmpty()) {
+    	if ($video->comments->isEmpty()) {
     		return response()->json(['res_type'=>'Not found', 'message'=>'No comments yet for this video.'],404);
     	}
 
