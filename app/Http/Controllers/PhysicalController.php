@@ -57,11 +57,11 @@ class PhysicalController extends Controller
     			'id'		 => $video->id,
     			'serie_id'	 => $video->serie_id,
     			'title'		 => $video->title,
-    			'workout_url'	 => $video->workout_url,
+    			'workout_url'=> $video->workout_url,
     			'likes'		 => $vide0->likes,
     			'dislikes'	 => $video->dislikes,
     			'comments_count'=> $video->comments->count(),
-                'created_at'      => $video->created_at,
+                'created_at'    => $video->created_at,
     		];
     		array_push($vidData, $data);
     	}

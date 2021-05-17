@@ -1,0 +1,4 @@
+deployment:
+  tasks:
+    - export DEPLOYPATH=/home/viedmzbj/app.viedial.com/
+    - /bin/cp -R * $DEPLOYPATH
