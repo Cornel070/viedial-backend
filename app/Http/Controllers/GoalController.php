@@ -151,7 +151,8 @@ class GoalController extends Controller
     	$goal = Goal::find($id);
 
     	if ($goal) {
-            list($weekly_deficit, $calorie_deficit)  = $this->getCalorieEq($request->weekly_deficit):$this->suggestWeeklyDeficit($request);
+            list($weekly_deficit, $calorie_deficit)  = $request->weekly_deficit ? 
+            $this->getCalorieEq($request->weekly_deficit) : $this->suggestWeeklyDeficit($request);
             $calorie_balance = $this->getCalorieTarget($calorie_deficit);
             $deficit_weight  = $this->setDeficitWeight($request);
             $goal_span       = $this->setGoalSpan($deficit_weight, $weekly_deficit, true);
