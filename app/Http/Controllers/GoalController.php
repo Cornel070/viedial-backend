@@ -111,10 +111,10 @@ class GoalController extends Controller
 
     public function getCalorieTarget($val)
     {
-        if ($user->gender === 'Male' || $user->gender === 'male') {
+        if ($this->user->gender === 'Male' || $this->user->gender === 'male') {
             $stayAliveCalorie = 2500 * 7; //calories needed  to stay alive for the week (Male);
             return $stayAliveCalorie - $val; 
-        }elseif ($user->gender === 'Female' || $user->gender === 'female') {
+        }elseif ($this->user->gender === 'Female' || $this->user->gender === 'female') {
             $stayAliveCalorie = 2000 * 7; //calories needed  to stay alive for the week (Female);
             return $stayAliveCalorie - $val; 
         }
