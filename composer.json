@@ -10,7 +10,7 @@
         "guzzlehttp/guzzle": "^7.2",
         "illuminate/mail": "^8.38",
         "laravel/lumen-framework": "^8.0",
-        "orangehill/iseed": "^3.0",
+        "laravelista/lumen-vendor-publish": "^8.0",
         "twilio/sdk": "^6.22",
         "tymon/jwt-auth": "^1.0"
     },

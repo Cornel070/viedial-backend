@@ -107,7 +107,6 @@ $app->register(App\Providers\AuthServiceProvider::class);
 $app->register(App\Providers\EventServiceProvider::class);
 $app->register(Flipbox\LumenGenerator\LumenGeneratorServiceProvider::class);
 $app->register(Illuminate\Mail\MailServiceProvider::class);
-$app->register(App\Providers\Iseed\IseedServiceProvider::class);
 
 /*
 |--------------------------------------------------------------------------

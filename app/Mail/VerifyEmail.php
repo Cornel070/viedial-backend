@@ -33,10 +33,10 @@ class VerifyEmail extends Mailable
      */
     public function build()
     {
-        return $this->from('hello@viedial.com')
+        return $this->from('info@viedial.com', 'Viedial Healthcare')
                 ->markdown('emails.verify', [
                     'code' => $this->verifyCode,
-                    'name' => $this->name
+                    'name' => $this->name,
                 ]);
     }
 }

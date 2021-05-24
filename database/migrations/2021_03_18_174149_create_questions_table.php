@@ -17,6 +17,9 @@ class CreateQuestionsTable extends Migration
             $table->id();
             $table->string('question_type');
             $table->string('question_text')->nullable();
+            $table->string('input_type');
+            $table->integer('indicator');
+            $table->string('special');
             $table->timestamps();
         });
     }

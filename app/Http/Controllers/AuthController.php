@@ -81,15 +81,27 @@ class AuthController extends Controller
 
     public function validator(Request $request)
     {
+        $msg = [
+            'name.required' => 'Name is required',
+            'name.string'   => 'Name must be a string',
+            'email.required' => 'Email is required',
+            'email.unique' => 'This email is already taken',
+            'email.email'   => 'Please enter a valid email address',
+            'phone.required'=>'A phone number is required',
+            'password.required' => 'Please enter a password for your account',
+            'password.confirmed' => 'Password does not match confirmed',
+            'program.required' => 'Please include client program',
+            'gender.required' => 'Please provide client gender'
+        ];
         return validator()->make($request->all(), [
             'name' => 'required|string',
-            'email' => 'required|string|unique:users',
+            'email' => 'required|string|unique:users|email',
             'dob'   => 'required',
             'phone' => 'required',
             'password' => 'required|confirmed|min:6',
             'program'=> 'required|string',
             'gender' => 'required|string',
-        ]);
+        ],$msg);
     }
 
     private function generateAnnon()
