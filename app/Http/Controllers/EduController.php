@@ -17,6 +17,65 @@ class EduController extends Controller
 		$this->user = auth()->user();
 	}
 
+    public function createSeries(Request $request)
+    {
+        $validator = $this->validateSeries($request);
+
+        if ($validator->fails())
+        {
+            return response()->json(['res_type'=> 'validator_error', 'errors'=>$validator->errors()->all()], 422);
+        }
+
+        $series = new Serie;
+        $series->title = $request->title;
+        $series->category = $request->category;
+        $series->save();
+
+        if ($request->has('video_urls')) {
+            $this->saveVidoes($request, $series->id, true);
+        }
+
+        return response()->json(['res_type'=>'success', 'message'=>'Series created']);
+    }
+
+    public function validateSeries(Request $request)
+    {
+        $msg = [
+            'title.required' => 'Title is required',
+            'title.string'   => 'Title must be a string',
+            'category.required' => 'Category is required',
+            'category.string' => 'Category must be a string',
+        ];
+
+        return validator()->make($request->all(), [
+            'title' => 'required|string',
+            'category' => 'required|string',
+        ],$msg);
+    }
+
+    public function saveVidoes(Request $request, $series_id, $w = false)
+    {
+        $vidArr = [];
+        foreach ($request['video_urls'] as $key => $value) {
+            array_push($vidArr, [
+                'serie_id' => $series_id,
+                'title'    => $request['titles'][$key],
+                'video_url'=> $request['video_urls'][$key],
+            ]);
+        }
+
+        for ($i = 0; $i < count($vidArr); $i++) { 
+            Video::create($vidArr[$i]);
+        }
+
+        // call was from within the class - another function
+        if ($w) {
+            return true;
+        }
+
+        return response()->json(['res_type'=>'success', 'message'=>'Video added']);
+    }
+
     public function index()
     {
     	$category = strtolower($this->user->program);
@@ -102,7 +161,7 @@ class EduController extends Controller
     			'serie_id'	 => $video->serie_id,
     			'title'		 => $video->title,
     			'video_url'	 => $video->video_url,
-    			'likes'		 => $vide0->likes,
+    			'likes'		 => $video->likes,
     			'dislikes'	 => $video->dislikes,
     			'comments_count'=> $video->comments->count(),
                 'created_at'      => $video->created_at,
@@ -162,10 +221,11 @@ class EduController extends Controller
     public function validateComment(Request $request)
     {
         $msg = [
-            'comment_text.required' => 'Please enter a comment',
+            'comment_text.required' => 'Please enter comment text',
+            'comment_text.string' => 'Please enter a valid string for the comment',
         ];
         return validator()->make($request->all(), [
-            'comment_text' => 'required',
+            'comment_text' => 'required|string',
         ], $msg);
     }
 
@@ -177,7 +237,7 @@ class EduController extends Controller
     		return response()->json(['res_type'=>'Not found', 'message'=>'Lecture series not found.'],404);
     	}
 
-    	$serie->likes = $series->likes+1;
+    	$serie->likes = $serie->likes+1;
     	$serie->save();
 
     	return response()->json(['res_type'=>'success', 'message'=>'Series liked']);
@@ -191,7 +251,7 @@ class EduController extends Controller
     		return response()->json(['res_type'=>'Not found', 'message'=>'Lecture series not found.'],404);
     	}
 
-    	$serie->dislikes = $series->dislikes+1;
+    	$serie->dislikes = $serie->dislikes+1;
     	$serie->save();
 
     	return response()->json(['res_type'=>'success', 'message'=>'Series disliked']);
@@ -251,7 +311,7 @@ class EduController extends Controller
     		return response()->json(['res_type'=>'Not found', 'message'=>'Video not found.'],404);
     	}
 
-    	$video->likes = $svideo->likes+1;
+    	$video->likes = $video->likes+1;
     	$video->save();
 
     	return response()->json(['res_type'=>'success', 'message'=>'Video liked']);
@@ -265,7 +325,7 @@ class EduController extends Controller
     		return response()->json(['res_type'=>'Not found', 'message'=>'Video not found.'],404);
     	}
 
-    	$video->dislikes = $svideo->dislikes+1;
+    	$video->dislikes = $video->dislikes+1;
     	$video->save();
 
     	return response()->json(['res_type'=>'success', 'message'=>'Video disliked']);

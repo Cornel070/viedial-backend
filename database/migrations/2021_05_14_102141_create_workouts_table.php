@@ -18,8 +18,8 @@ class CreateWorkoutsTable extends Migration
             $table->unsignedBigInteger('phy_category_id');
             $table->string('title');
             $table->string('workout_url');
-            $table->integer('likes');
-            $table->integer('dislikes');
+            $table->integer('likes')->default(0);
+            $table->integer('dislikes')->default(0);
             $table->timestamps();
             $table->foreign('phy_category_id')->references('id')->on('phy_categories')->onDelete('cascade')->onUpdate('no action');
         });

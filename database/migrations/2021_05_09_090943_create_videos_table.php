@@ -18,8 +18,8 @@ class CreateVideosTable extends Migration
             $table->unsignedBigInteger('serie_id');
             $table->string('title');
             $table->string('video_url');
-            $table->integer('likes');
-            $table->integer('dislikes');
+            $table->integer('likes')->default(0);
+            $table->integer('dislikes')->default(0);
             $table->timestamps();
             $table->foreign('serie_id')->references('id')->on('series')->onDelete('cascade')->onUpdate('no action');
         });

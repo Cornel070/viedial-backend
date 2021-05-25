@@ -28,6 +28,11 @@ $router->group(['prefix' => 'api'], function () use ($router) {
         $router->post('check-risk', ['uses' => 'RiskController@checkRisk']);
     });
 
+    // Educational Curriculum (Admin Access)
+    $router->group(['prefix' => 'edu'], function () use ($router) {
+        $router->post('create-series', ['uses' => 'EduController@createSeries']);
+    });
+
     $router->group(['middleware' => ['auth']], function () use ($router) {
         // Tele-monitoring Routes
         $router->group(['prefix' => 'tele'], function () use ($router) {
@@ -71,12 +76,12 @@ $router->group(['prefix' => 'api'], function () use ($router) {
         // Educational Curriculum Routes
         $router->group(['prefix' => 'edu'], function () use ($router) {
             //Series
-            $router->post('/', ['uses' => 'EduController@index']);
+            $router->get('/', ['uses' => 'EduController@index']);
             $router->get('series/{id}/videos', ['uses' => 'EduController@seriesVideos']);
+            $router->post('series/{id}/comment', ['uses' => 'EduController@commentOnSeries']);
             $router->get('series/{id}/comments', ['uses' => 'EduController@seriesComments']);
             $router->get('series/{id}/like', ['uses' => 'EduController@likeSeries']);
             $router->get('series/{id}/dislike', ['uses' => 'EduController@dislikeSeries']);
-            $router->post('series/{id}/comment', ['uses' => 'EduController@commentOnSeries']);
             //Videos
             $router->post('video/{id}/comment', ['uses' => 'EduController@commentOnVideo']);
             $router->get('video/{id}/comments', ['uses' => 'EduController@videoComments']);
@@ -87,13 +92,14 @@ $router->group(['prefix' => 'api'], function () use ($router) {
         // Viedial Community Routes
         $router->group(['prefix' => 'cmt'], function () use ($router) {
             //Post
-            $router->post('make-post', ['uses' => ' CommunityController@makePost']);
-            $router->get('posts', ['uses' => ' CommunityController@allPosts']);
-            $router->get('post/{id}', ['uses' => ' CommunityController@singlePost']);
-            $router->post('post/{id}/comment', ['uses' => ' CommunityController@commentOnPost']);
-            $router->get('post/{id}/comments', ['uses' => ' CommunityController@getPostComments']);
-            $router->post('comment/{id}/reply', ['uses' => ' CommunityController@sendReply']);
-            $router->get('comment/{id}', ['uses' => ' CommunityController@singleComment']);
+            $router->post('make-post', ['uses' => 'CommunityController@makePost']);
+            $router->get('topics', ['uses' => 'CommunityController@getTopics']);
+            $router->get('posts', ['uses' => 'CommunityController@allPosts']);
+            $router->get('post/{id}', ['uses' => 'CommunityController@singlePost']);
+            $router->post('post/{id}/comment', ['uses' => 'CommunityController@commentOnPost']);
+            $router->get('post/{id}/comments', ['uses' => 'CommunityController@getPostComments']);
+            $router->post('comment/{id}/reply', ['uses' => 'CommunityController@sendReply']);
+            $router->get('comment/{id}', ['uses' => 'CommunityController@singleComment']);
         });
 
         // Educational Curriculum Routes

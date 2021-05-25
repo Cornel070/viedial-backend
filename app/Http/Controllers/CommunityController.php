@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use App\Models\Post;
 use App\Models\Comment;
 use App\Models\Reply;
+use App\Models\Topic;
 
 class CommunityController extends Controller
 {
@@ -26,7 +27,7 @@ class CommunityController extends Controller
         }
 
         $post = new Post;
-        $post->topic = $request->topic;
+        $post->topic = $request->topic;  //topics are: Type 2 Diabetes, Meals, Hypertension, CVD, Fitness, Physical Activity
         $post->user_id = $this->user->id;
         $post->post_text = $request->post_text;
         $post->save();
@@ -37,7 +38,7 @@ class CommunityController extends Controller
 	public function validatePost(Request $request)
     {
         $msg = [
-            'post_text.required' => 'Please enter a post',
+            'post_text.required' => 'Please enter post text',
             'topic.required'	 => 'Please select a topic for the post',
             'topic.string'		 => 'The topic must be a valid text'
         ];
@@ -45,6 +46,17 @@ class CommunityController extends Controller
             'post_text' => 'required',
             'topic'		=> 'required|string'
         ], $msg);
+    }
+
+    public function getTopics()
+    {
+        $topics = Topic::all();
+
+        if ($topics->isEmpty()) {
+            return response()->json(['res_type'=>'not found', 'message'=>'No topics found'],404);
+        }
+
+        return response()->json(['res_type'=>'success', 'topics'=>$topics]);
     }
 
     public function allPosts()
@@ -211,14 +223,14 @@ class CommunityController extends Controller
 
     	$commData = [];
 
-    	if ($comm->replies->count() > 0) {
+    	if ($comment->replies->count() > 0) {
 	    	//get replies
 		    $replyData = [];
 
-		    foreach ($comm->replies as $reply) {
+		    foreach ($comment->replies as $reply) {
 		    	$replies = [
 		    		'id'			=> $reply->id,
-		    		'comment_id'	=> $comm->id,
+		    		'comment_id'	=> $comment->id,
 		    		'by'			=> $reply->user->annon_name,
 		    		'reply_text'	=> $reply->reply_text,
 		    		'created_at'	=> $reply->created_at,
@@ -230,11 +242,11 @@ class CommunityController extends Controller
 	    }
 
     	$data = [
-    		'id'			=> $comm->id,
-    		'by'			=> $comm->user->annon_name,
-    		'comment_text'	=> $comm->reply_text,
+    		'id'			=> $comment->id,
+    		'by'			=> $comment->user->annon_name,
+    		'comment_text'	=> $comment->reply_text,
     		'replies'		=> $replyData,
-    		'created_at'	=> $comm->created_at
+    		'created_at'	=> $comment->created_at
     	];
     	array_push($commData, $data);
 

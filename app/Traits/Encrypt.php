@@ -13,6 +13,19 @@ trait Encrypt
      *
      * @return $value
      */
+    // public function getAttribute($key)
+    // {
+    //     $value = parent::getAttribute($key);
+    //     if (in_array($key, $this->encryptable) && $value !== '') {
+    //         try {
+    //             return decrypt($this->attributes[$key]);
+    //         } catch (\Exception $e) {
+    //             return $this->attributes[$key];
+    //         }
+    //     }
+    //     return $value;
+    // }
+
     public function getAttribute($key)
     {
         $value = parent::getAttribute($key);
@@ -20,11 +33,6 @@ trait Encrypt
             $value = decrypt($value);
         }
         return $value;
-        // if($key !== 'acct_key'){
-            
-        // }
-
-        // return parent::getAttribute($key);
     }
     /**
      * If the attribute is in the encryptable array

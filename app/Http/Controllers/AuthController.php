@@ -41,7 +41,7 @@ class AuthController extends Controller
             return response()->json(['res_type'=> 'validator_error', 'errors'=>$validator->errors()->all()], 422);
         }
 
-        if(!$this->emailIsUnique($request->email)){
+        if($this->emailIsNotUnique($request->email)){
             $notUnique['email_not_unique'] = 'This email has already been taken'; 
             return response()->json(['res_type'=> 'validator_error', 'errors'=>$notUnique], 422);
         }
@@ -66,17 +66,17 @@ class AuthController extends Controller
         return response()->json(['res_type'=> 'success', 'name'=>$user->name], 200);
     }
 
-    private function emailIsUnique($email)
+    private function emailIsNotUnique($email)
     {
         foreach(User::all() as $user)
         {
             if($user->email === $email)
             {
-                return false;
+                return true;
             }
         }
 
-        return true;
+        return false;
     }
 
     public function validator(Request $request)
