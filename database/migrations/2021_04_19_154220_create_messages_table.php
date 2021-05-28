@@ -21,6 +21,7 @@ class CreateMessagesTable extends Migration
             $table->integer('to_id');
             $table->string('to_name');
             $table->text('message_text');
+            $table->string('status', 10)->default('unread');
             $table->timestamps();
             $table->foreign('chat_id')->references('id')->on('chats')->onDelete('cascade')->onUpdate('no action');
         });

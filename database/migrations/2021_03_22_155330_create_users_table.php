@@ -24,7 +24,7 @@ class CreateUsersTable extends Migration
             $table->string('program')->nullable();
             $table->string('gender');
             $table->string('acct_key')->nullable();
-            $table->string('status')->default('active');
+            $table->string('status')->default("false");//Subscription status
             $table->string('role')->default('Client');
             $table->timestamp('email_verified_at')->nullable();
             $table->timestamps();

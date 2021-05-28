@@ -81,19 +81,19 @@ class TeleMonitoringController extends Controller
     		$level = 'Normal';
             $msg = 'Your blood pressure is on a normal levels.';
 
-    	}elseif ($record->blood_pressure_systolic > 120 && $record->blood_pressure_systolic < 141 && $record->blood_pressure_diastolic >= 80 && $record->blood_pressure_diastolic < 91) {
+    	}elseif ($record->blood_pressure_systolic >= 120 && $record->blood_pressure_systolic < 141 && $record->blood_pressure_diastolic >= 80 && $record->blood_pressure_diastolic < 91) {
             $level = 'Slightly High';
             $msg = 'Your blood pressure is slightly high. You need to watch it.';
 
-    	}elseif ($record->blood_pressure_systolic > 140 && $record->blood_pressure_systolic < 151 && $record->blood_pressure_diastolic > 90 && $record->blood_pressure_diastolic < 101) {
+    	}elseif ($record->blood_pressure_systolic >= 140 && $record->blood_pressure_systolic < 151 && $record->blood_pressure_diastolic >= 90 && $record->blood_pressure_diastolic < 101) {
             $level = 'Really High';
             $msg = 'Your blood pressure is really high. You need to talk to your doctor about starting or changing your treatment.';
 
-        }elseif ($record->blood_pressure_systolic > 150 && $record->blood_pressure_systolic < 161 && $record->blood_pressure_diastolic > 99 && $record->blood_pressure_diastolic < 111) {
+        }elseif ($record->blood_pressure_systolic >= 150 && $record->blood_pressure_systolic < 161 && $record->blood_pressure_diastolic >= 99 && $record->blood_pressure_diastolic < 111) {
             $level = 'Dangerously High';
             $msg = 'Your blood pressure is dangerously high. You need urgent treatment to prevent it from increasing.';
 
-        }elseif ($record->blood_pressure_systolic > 159 && $record->blood_pressure_diastolic > 110) {
+        }elseif ($record->blood_pressure_systolic >= 159 && $record->blood_pressure_diastolic >= 110) {
             $level = 'Very High';
             $msg = 'Your blood pressure has reached very dangerous levels. This can cause a complication that will lead to significant health problems or death. You need to see a doctor immediately.';
 

@@ -7,6 +7,7 @@ use App\Models\PhyCategory;
 use App\Models\Workout;
 use App\Models\PhyComment;
 use App\Models\WorkoutComment;
+use App\Models\WorkoutTracker;
 
 class PhysicalController extends Controller
 {
@@ -22,7 +23,7 @@ class PhysicalController extends Controller
     	$workout_series = [];
     	$series = PhyCategory::all();
     	if ($series->isEmpty()) {
-    		return response()->json(['res_type'=>'Not found', 'message'=>'No workout series yet.'],404);
+    		return response()->json(['res_type'=>'not found', 'message'=>'No workout series yet.']);
     	}
     	foreach ($series as $serie) {
     		$data = [
@@ -44,20 +45,30 @@ class PhysicalController extends Controller
     	$serie = PhyCategory::find($id);
 
     	if (!$serie) {
-    		return response()->json(['res_type'=>'Not found', 'message'=>'Workout series not found.'],404);
+    		return response()->json(['res_type'=>'not found', 'message'=>'Workout series not found.'],404);
     	}
 
     	if ($serie->workouts->isEmpty()) {
-    		return response()->json(['res_type'=>'Not found', 'message'=>'No videos yet for this workout series.'],404);
+    		return response()->json(['res_type'=>'not found', 'message'=>'No videos yet for this workout series.']);
     	}
 
     	$vidData = [];
     	foreach ($serie->workouts as $video) {
+            $done = false;
+            $tracked = WorkoutTracker::whereDate('created_at', Carbon::today())
+            ->where('workout_id', $video->id)
+            ->where('user_id', $this->user->id)
+            ->first();
+            if ($tracked) {
+                $done = true;
+            }
     		$data = [
     			'id'		 => $video->id,
     			'serie_id'	 => $video->serie_id,
     			'title'		 => $video->title,
     			'workout_url'=> $video->workout_url,
+                'calorie_burn'=> $video->calorie_burn,
+                'done'        => $done,
     			'likes'		 => $vide0->likes,
     			'dislikes'	 => $video->dislikes,
     			'comments_count'=> $video->comments->count(),
@@ -218,12 +229,48 @@ class PhysicalController extends Controller
     	$video = Workout::find($id);
 
     	if (!$video) {
-    		return response()->json(['res_type'=>'Not found', 'message'=>'Workout not found.'],404);
+    		return response()->json(['res_type'=>'not found', 'message'=>'Workout not found'],404);
     	}
 
     	$video->dislikes = $svideo->dislikes+1;
     	$video->save();
 
     	return response()->json(['res_type'=>'success', 'message'=>'Workout disliked']);
+    }
+
+    public function doneWorkout($id)
+    {
+        $video = Workout::find($id);
+        if (!$video) {
+            return response()->json(['res_type'=>'not found', 'message'=>'Workout not found'],404);
+        }
+
+        WorkoutTracker::create([
+            'user_id' => $this->user->id,
+            'workout_id'=> $id
+        ]);
+
+        return response()->json(['res_type'=>'success', 'message'=>'Workout done']);
+    }
+
+    public function undoWorkout($id)
+    {
+        $video = Workout::find($id);
+        if (!$video) {
+            return response()->json(['res_type'=>'not found', 'message'=>'Workout not found'],404);
+        }
+
+        $tracked = WorkoutTracker::whereDate('created_at', Carbon::today())
+        ->where('workout_id', $id)
+        ->where('user_id', $this->user->id)
+        ->first();
+
+        if (!$tracked) {
+            return response()->json(['res_type'=>'not done', 'message'=>'Workout was previously not done']);
+        }
+
+        $tracked->delete();
+
+        return response()->json(['res_type'=>'success', 'message'=>'Workout undone']);
     }
 }

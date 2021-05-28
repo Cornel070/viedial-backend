@@ -31,7 +31,7 @@ class Welcome extends Mailable
      */
     public function build()
     {
-       return $this->from('hello@viedial.com')
+       return $this->from('info@viedial.com', 'Viedial Healthcare')
             ->subject('Welcome to Viedial Health Care')
             ->markdown('emails.welcome', [
                 'user' => $this->user,

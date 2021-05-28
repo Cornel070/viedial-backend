@@ -19,6 +19,9 @@ $router->group(['prefix' => 'api'], function () use ($router) {
         $router->post('login', ['uses' => 'AuthController@login']);
         $router->post('register', ['uses' => 'AuthController@register']);
         $router->get('verify/{code}', ['uses' => 'AuthController@verifyFromEmail']);
+        $router->get('key/{key}/check', ['uses' => 'AuthController@checkAcctKey']); //forgot password
+        $router->post('update-password', ['uses' => 'AuthController@updatePassword']); //forgot password
+        $router->get('check-token', ['uses' => 'AuthController@checkToken']);//check if token has expired
     });
 
     // Risk Assessment Routes
@@ -41,6 +44,7 @@ $router->group(['prefix' => 'api'], function () use ($router) {
             $router->get('all-readings', ['uses' => 'TeleMonitoringController@allReadings']);
         });
 
+
         // Goal Setting Routes
         $router->group(['prefix' => 'goal'], function () use ($router) {
             $router->post('set-goal', ['uses' => 'GoalController@saveGoal']);
@@ -62,6 +66,10 @@ $router->group(['prefix' => 'api'], function () use ($router) {
             $router->post('send-chat', ['uses' => 'ChatController@sendDirectChat']);
             $router->get('all-chats', ['uses' => 'ChatController@viewAllChats']);
             $router->get('chat/{id}/messages', ['uses' => 'ChatController@allChatMessages']);
+            $router->get('recipients', ['uses' => 'ChatController@allDoctors']);//###########
+            $router->get('check-chat/{user_id}', ['uses' => 'ChatController@checkPrevChat']);//###########
+            $router->get('chat/{id}/read', ['uses' => 'ChatController@markChatAsRead']);//###########
+            $router->get('msg/{id}/read', ['uses' => 'ChatController@markMsgAsRead']);//###########
             $router->delete('delete-message/{id}', ['uses' => 'ChatController@deleteMessage']);
             $router->delete('delete-chat/{id}', ['uses' => 'ChatController@deleteChat']);
             // Multi deletes
@@ -102,7 +110,7 @@ $router->group(['prefix' => 'api'], function () use ($router) {
             $router->get('comment/{id}', ['uses' => 'CommunityController@singleComment']);
         });
 
-        // Educational Curriculum Routes
+        // Physical Activity Routes
         $router->group(['prefix' => 'phy'], function () use ($router) {
             //Series
             $router->post('/', ['uses' => 'PhysicalController@index']);
@@ -116,6 +124,19 @@ $router->group(['prefix' => 'api'], function () use ($router) {
             $router->get('video/{id}/comments', ['uses' => 'PhysicalController@workoutComments']);
             $router->get('video/{id}/like', ['uses' => 'PhysicalController@likeVideo']);
             $router->get('video/{id}/dislike', ['uses' => 'PhysicalController@dislikeVideo']);
+            $router->get('workout/{id}/done', ['uses' => 'PhysicalController@doneWorkout']);//#######
+            $router->get('workout/{id}/undo', ['uses' => 'PhysicalController@undoWorkout']);//#######
+        });
+
+        // Update different parts of the apps
+        $router->group(['prefix' => 'update'], function () use ($router) {
+            //update phone
+            $router->post('phone', ['uses' => 'UpdateController@updatePhone']);
+        });
+
+        // Notifications and Reminders Routes
+        $router->group(['prefix' => 'notification'], function () use ($router) {
+            $router->get('all', ['uses' => 'NotificationController@allNotifications']);
         });
     });
 });

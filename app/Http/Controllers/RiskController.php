@@ -111,9 +111,9 @@ class RiskController extends Controller
         }
 
         if ($type === 'diabetes') {
-            $assessment_type = 'Type 2 Diabetes';
+            $assessment_type = 'diabetes';
         }else{
-            $assessment_type = 'Cardiovascular Disease';
+            $assessment_type = 'hypertension';
         }
 
         return response()->json(['res_type'=> 'success', 'assessment_type'=> $assessment_type, 'questions'=>$questions]);
@@ -126,7 +126,7 @@ class RiskController extends Controller
         $gender     = strtolower($request->gender);
 
         switch ($assessment) {
-            case 'cvd':
+            case 'hypertension':
                 return $this->CVDRiskLevel($score, $gender);
                 break;
 
@@ -146,63 +146,70 @@ class RiskController extends Controller
             case ($score < 11 && $gender === 'male'):
                 return response()->json([
                     'res_type'  => 'success',
-                    'assessment_type'=> 'Cardiovascular Disease', 
+                    'assessment_type'=> 'hypertension', 
                     'score'     => $score,
-                    'risk_level'=> 'Low'
+                    'risk_level'=> 'Low',
+                    'implication'=>'Hypertension is called a "silent killer". Most people with hypertension are unaware of the problem because it may have no warning signs or symptoms. For this reason, it is essential that blood pressure is measured regularly.'
                 ]);
                 break;
 
             case ($score < 13 && $gender === 'female'):
                 return response()->json([
                     'res_type'  => 'success',
-                    'assessment_type'=> 'Cardiovascular Disease', 
+                    'assessment_type'=> 'hypertension', 
                     'score'     => $score,
-                    'risk_level'=> 'Low'
+                    'risk_level'=> 'Low',
+                    'implication'=>'Hypertension is called a "silent killer". Most people with hypertension are unaware of the problem because it may have no warning signs or symptoms. For this reason, it is essential that blood pressure is measured regularly.'
                 ]);
                 break;
 
             case ($score > 10  && $score < 15 && $gender === 'male'):
                 return response()->json([
                     'res_type'  => 'success',
-                    'assessment_type'=> 'Cardiovascular Disease', 
+                    'assessment_type'=> 'hypertension', 
                     'score'     => $score,
-                    'risk_level'=> 'Intermediate'
+                    'risk_level'=> 'Intermediate',
+                    'implication'=>'Hypertension is called a "silent killer". Most people with hypertension are unaware of the problem because it may have no warning signs or symptoms. For this reason, it is essential that blood pressure is measured regularly.'
                 ]);
                 break;
 
             case ($score > 12  && $score < 18 && $gender === 'female'):
                 return response()->json([
                     'res_type'  => 'success',
-                    'assessment_type'=> 'Cardiovascular Disease', 
+                    'assessment_type'=> 'hypertension', 
                     'score'     => $score,
-                    'risk_level'=> 'Intermediate'
+                    'risk_level'=> 'Intermediate',
+                    'implication'=>'Hypertension is called a "silent killer". Most people with hypertension are unaware of the problem because it may have no warning signs or symptoms. For this reason, it is essential that blood pressure is measured regularly.'
                 ]);
                 break;
 
             case ($score > 14 && $gender === 'male'):
                 return response()->json([
                     'res_type'  => 'success',
-                    'assessment_type'=> 'Cardiovascular Disease', 
+                    'assessment_type'=> 'hypertension', 
                     'score'     => $score,
-                    'risk_level'=> 'High'
+                    'risk_level'=> 'High',
+                    'implication'=>'Hypertension is called a "silent killer". Most people with hypertension are unaware of the problem because it may have no warning signs or symptoms. For this reason, it is essential that blood pressure is measured regularly.'
                 ]);
                 break;
 
             case ($score > 17 && $gender === 'female'):
                 return response()->json([
                     'res_type'  => 'success',
-                    'assessment_type'=> 'Cardiovascular Disease',
+                    'assessment_type'=> 'hypertension',
                     'score'     => $score,
-                    'risk_level'=> 'High'
+                    'risk_level'=> 'High',
+                    'implication'=>'Hypertension is called a "silent killer". Most people with hypertension are unaware of the problem because it may have no warning signs or symptoms. For this reason, it is essential that blood pressure is measured regularly.'
                 ]);
                 break;
             
             default:
                 return response()->json([
                     'res_type'  => 'success',
-                    'assessment_type'=> 'Cardiovascular Disease', 
+                    'assessment_type'=> 'hypertension', 
                     'score'     => $score,
-                    'risk_level'=> 'Low'
+                    'risk_level'=> 'Low',
+                    'implication'=>'Hypertension is called a "silent killer". Most people with hypertension are unaware of the problem because it may have no warning signs or symptoms. For this reason, it is essential that blood pressure is measured regularly.'
                 ]);
                 break;
         }
@@ -214,54 +221,60 @@ class RiskController extends Controller
             case ($score < 7):
                 return response()->json([
                 'res_type'  => 'success',
-                'assessment_type'=> 'Type 2 Diabetes', 
+                'assessment_type'=> 'diabetes', 
                 'score'     => $score,
-                'risk_level'=> 'Low'
+                'risk_level'=> 'Low',
+                'implication'=>"There are three major types of the disease: type 1, type 2, and gestational diabetes. With all three, your body can't make or use insulin. One of every four people with diabetes doesn't know they have it."
             ]);
             break;
 
             case ($score > 6 && $score < 12):
                 return response()->json([
                 'res_type'  => 'success',
-                'assessment_type'=> 'Type 2 Diabetes', 
+                'assessment_type'=> 'diabetes', 
                 'score'     => $score,
-                'risk_level'=> 'Slightly elevated'
+                'risk_level'=> 'Slightly elevated',
+                'implication'=>"There are three major types of the disease: type 1, type 2, and gestational diabetes. With all three, your body can't make or use insulin. One of every four people with diabetes doesn't know they have it."
             ]);
             break;
 
             case ($score > 11 && $score < 15):
                 return response()->json([
                 'res_type'  => 'success',
-                'assessment_type'=> 'Type 2 Diabetes', 
+                'assessment_type'=> 'diabetes', 
                 'score'     => $score,
-                'risk_level'=> 'Moderate'
+                'risk_level'=> 'Moderate',
+                'implication'=>"There are three major types of the disease: type 1, type 2, and gestational diabetes. With all three, your body can't make or use insulin. One of every four people with diabetes doesn't know they have it."
             ]);
             break;
 
             case ($score > 14 && $score < 21):
                 return response()->json([
                 'res_type'  => 'success',
-                'assessment_type'=> 'Type 2 Diabetes', 
+                'assessment_type'=> 'diabetes', 
                 'score'     => $score,
-                'risk_level'=> 'High'
+                'risk_level'=> 'High',
+                'implication'=>"There are three major types of the disease: type 1, type 2, and gestational diabetes. With all three, your body can't make or use insulin. One of every four people with diabetes doesn't know they have it."
             ]);
             break;
 
             case ($score > 20):
                 return response()->json([
                 'res_type'  => 'success',
-                'assessment_type'=> 'Type 2 Diabetes', 
+                'assessment_type'=> 'diabetes', 
                 'score'     => $score,
-                'risk_level'=> 'Very High'
+                'risk_level'=> 'Very High',
+                'implication'=>"There are three major types of the disease: type 1, type 2, and gestational diabetes. With all three, your body can't make or use insulin.One of every four people with diabetes doesn't know they have it."
             ]);
             break;
             
             default:
                 return response()->json([
                 'res_type'  => 'success',
-                'assessment_type'=> 'Type 2 Diabetes', 
+                'assessment_type'=> 'diabetes', 
                 'score'     => $score,
-                'risk_level'=> 'Low'
+                'risk_level'=> 'Low',
+                'implication'=>"There are three major types of the disease: type 1, type 2, and gestational diabetes. With all three, your body can't make or use insulin. One of every four people with diabetes doesn't know they have it."
             ]);
             break;
         }

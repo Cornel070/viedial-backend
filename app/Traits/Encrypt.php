@@ -13,27 +13,27 @@ trait Encrypt
      *
      * @return $value
      */
-    // public function getAttribute($key)
-    // {
-    //     $value = parent::getAttribute($key);
-    //     if (in_array($key, $this->encryptable) && $value !== '') {
-    //         try {
-    //             return decrypt($this->attributes[$key]);
-    //         } catch (\Exception $e) {
-    //             return $this->attributes[$key];
-    //         }
-    //     }
-    //     return $value;
-    // }
-
     public function getAttribute($key)
     {
         $value = parent::getAttribute($key);
         if (in_array($key, $this->encryptable) && $value !== '') {
-            $value = decrypt($value);
+            try {
+                return decrypt($this->attributes[$key]);
+            } catch (\Illuminate\Contracts\Encryption\DecryptException $e) {
+                return $this->attributes[$key];
+            }
         }
         return $value;
     }
+
+    // public function getAttribute($key)
+    // {
+    //     $value = parent::getAttribute($key);
+    //     if (in_array($key, $this->encryptable) && $value !== '') {
+    //         $value = decrypt($value);
+    //     }
+    //     return $value;
+    // }
     /**
      * If the attribute is in the encryptable array
      * then encrypt it.

@@ -18,6 +18,7 @@ class CreateWorkoutsTable extends Migration
             $table->unsignedBigInteger('phy_category_id');
             $table->string('title');
             $table->string('workout_url');
+            $table->integer('calorie_burn');
             $table->integer('likes')->default(0);
             $table->integer('dislikes')->default(0);
             $table->timestamps();
