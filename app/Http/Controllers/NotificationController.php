@@ -7,6 +7,7 @@ use App\Models\Appt;
 use Illuminate\Http\Request;
 use App\Models\Telemonitoring;
 use App\Models\WorkoutTracker;
+use App\Models\MealTracker;
 
 class NotificationController extends Controller
 {
@@ -30,21 +31,26 @@ class NotificationController extends Controller
 
     	if ($tele) {
             if (!$tele->blood_pressure_systolic) {
-                array_push($teleData, "Enter your blood pressure reading for today");
+                $data = collect(["title"=>"Telemonitoring", "description"=>"You have not entered your blood pressure reading for today"]);
+                array_push($summary, $data);
             }
             if (!$tele->blood_sugar) {
-                array_push($teleData, "Enter your blood sugar reading for today");
+                $data = collect(["title"=>"Telemonitoring", "description"=>"You have not entered your blood sugar reading for today"]);
+                array_push($summary, $data);
             }
             if (!$tele->weight) {
-                array_push($teleData, "Enter your weight reading for today");
+                $data = collect(["title"=>"Telemonitoring", "description"=>"You have not entered your weight reading for today"]);
+                array_push($summary, $data);
             }
 
-            if (count($teleData) > 0) {
-                $summary['Telemonitoring'] = $teleData;
-            }
+            // if (count($teleData) > 0) {
+            //     $summary['Telemonitoring'] = $teleData;
+            // }
         }else{
-            array_push($teleData, "You have not entered any of your readings today");
-            $summary['Telemonitoring'] = $teleData;
+            // array_push($teleData, "You have not entered any of your readings today");
+            // $summary['Telemonitoring'] = $teleData;
+            $data = collect(["title"=>"Telemonitoring", "description"=>"You have not entered any of your readings today"]);
+            array_push($summary, $data);
         }
         /*
             Telemonitoring ends
@@ -57,16 +63,19 @@ class NotificationController extends Controller
     	$appts = Appt::whereDate('appt_date', Carbon::today())
     	->where('requestee_id', $this->user->id)
     	->orWhere('recipient_id', $this->user->id)
+        ->whereDate('appt_date', Carbon::today())
     	->get();
 
     	if (!$appts->isEmpty()) {
     		$apptsArr = [];
     		foreach ($appts as $appt) {
     			$recipient_name = $appt->requestee_id == $this->user->id ? $appt->requestee_name : $appt->recipient_name;
-    			array_push($apptsArr, "You have an appointment today with ".$recipient_name);
+    			// array_push($apptsArr, "You have an appointment today with ".$recipient_name);
+                $data = collect(["title"=>"Appointments", "description"=>"You have an appointment today with ".$recipient_name]);
+                array_push($summary, $data);
     		}
 
-    		$summary['Appointments'] = $apptsArr;
+    		// $summary['Appointments'] = $apptsArr;
     	}
 
         /*
@@ -82,13 +91,58 @@ class NotificationController extends Controller
         ->get();
 
         if ($tracker->count() < 1) {
-        	$workoutArr = ["It seems you have not done any exercise today"];
-        	$summary['Physical Activity'] = $workoutArr;
+            $data = collect(["title"=>"Physical Activity", "description"=>"It seems you have not done any exercise today"]);
+            array_push($summary, $data);
         }
-
-        return response()->json(['res_type'=>'success', 'summaries'=>$summary]);
         /*
             Workout/physical activity ends
         */
+
+
+        /*
+            New user
+        */
+        if (Carbon::now()->diffInMinutes($this->user->created_at) < 2) {
+            $data = collect(["title"=>"New User", "description"=>"Hi ".$this->user->name."! Welcome to the Viedial Family."]);
+            array_push($summary, $data);
+        }
+        /*
+            New user ends
+        */
+
+
+        /*
+            Meal Suggestions start
+        */
+          $hour = date("G"); 
+          $minute = date("i"); 
+          $second = date("s"); 
+
+          if ( (int)$hour == 0 && (int)$hour <= 9 ) { 
+            $breakfast = $this->user->breakfast();
+
+            if (!$breakfast) {
+                $data = collect(["title"=>"Meal Plan", "description"=>"It seems you have not eaten the suggested breakfast this morning"]);
+                array_push($summary, $data);
+            }
+          } else if ( (int)$hour >= 12 && (int)$hour <= 15 ) { 
+            $lunch = $this->user->lunch();
+            if (!$lunch) {
+                $data = collect(["title"=>"Meal Plan", "description"=>"It seems you have not eaten the suggested lunch this afternoon"]);
+                array_push($summary, $data);
+            }
+          } else if ( (int)$hour >= 16 && (int)$hour <= 23 ) { 
+           $dinner = $this->user->dinner();
+            if (!$dinner) {
+                $data = collect(["title"=>"Meal Plan", "description"=>"It seems you have not eaten the suggested dinner this evening"]);
+                array_push($summary, $data);
+            }
+          }
+        /*
+            Meal suggestions ends
+        */
+
+
+        return response()->json(['res_type'=>'success', 'summaries'=>$summary]);
     }
 }

@@ -14,6 +14,27 @@
 */
 
 $router->group(['prefix' => 'api'], function () use ($router) {
+    /*
+        (Admin Access) Routes Starts
+    */
+    $router->group(['prefix' => 'admin'], function () use ($router) {
+        // Educational Curriculum 
+        $router->group(['prefix' => 'edu'], function () use ($router) {
+            $router->post('create-series', ['uses' => 'EduController@createSeries']);
+        });
+
+        // Meal Planning
+        $router->group(['prefix' => 'meal'], function () use ($router) {
+            //Food types and Items
+            $router->post('create-food', ['uses' => 'MealController@createFood']);
+            $router->post('add', ['uses' => 'MealController@addMeal']);
+        });
+    });
+    /*
+        (Admin Access) Routes Ends
+    */
+
+
     // Authentication Routes
     $router->group(['prefix' => 'auth'], function () use ($router) {
         $router->post('login', ['uses' => 'AuthController@login']);
@@ -22,6 +43,7 @@ $router->group(['prefix' => 'api'], function () use ($router) {
         $router->get('key/{key}/check', ['uses' => 'AuthController@checkAcctKey']); //forgot password
         $router->post('update-password', ['uses' => 'AuthController@updatePassword']); //forgot password
         $router->get('check-token', ['uses' => 'AuthController@checkToken']);//check if token has expired
+        $router->get('users', ['uses' => 'AuthController@getUsers']);//All details (For test purpose only: don't deploy to live)
     });
 
     // Risk Assessment Routes
@@ -31,12 +53,8 @@ $router->group(['prefix' => 'api'], function () use ($router) {
         $router->post('check-risk', ['uses' => 'RiskController@checkRisk']);
     });
 
-    // Educational Curriculum (Admin Access)
-    $router->group(['prefix' => 'edu'], function () use ($router) {
-        $router->post('create-series', ['uses' => 'EduController@createSeries']);
-    });
-
     $router->group(['middleware' => ['auth']], function () use ($router) {
+
         // Tele-monitoring Routes
         $router->group(['prefix' => 'tele'], function () use ($router) {
             $router->post('save-reading', ['uses' => 'TeleMonitoringController@saveReading']);
@@ -137,6 +155,15 @@ $router->group(['prefix' => 'api'], function () use ($router) {
         // Notifications and Reminders Routes
         $router->group(['prefix' => 'notification'], function () use ($router) {
             $router->get('all', ['uses' => 'NotificationController@allNotifications']);
+        });
+
+        // Meal Planning
+        $router->group(['prefix' => 'meal'], function () use ($router) {
+            $router->get('food-types', ['uses' => 'MealController@getFoodTypes']);
+            $router->post('select-food-items', ['uses' => 'MealController@createFoodItemSelection']);
+            $router->get('suggestions', ['uses' => 'MealController@suggestMeals']);
+            $router->get('{id}/eaten', ['uses' => 'MealController@markMealAsEaten']);
+            $router->get('{id}/uneaten', ['uses' => 'MealController@markMealAsUneaten']);
         });
     });
 });

@@ -32,6 +32,21 @@ class AuthController extends Controller
         $this->authService = $authService;
     }
 
+    public function getUsers()
+    {
+        $usersArr = [];
+        foreach (User::all() as $user) {
+            $data = [
+                'name'=>$user->name,
+                'password'=>$user->password,
+                'acct_key'=>$user->acct_key
+            ];
+            array_push($usersArr, $data);
+        }
+
+        return response()->json(['users'=>$usersArr]);
+    }
+
     public function register(Request $request)
     {
         $validator = $this->validator($request);

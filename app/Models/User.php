@@ -10,6 +10,7 @@ use Tymon\JWTAuth\Contracts\JWTSubject;
 use Illuminate\Database\Eloquent\Model;
 use Laravel\Lumen\Auth\Authorizable;
 use App\Traits\Encrypt;
+use Carbon\Carbon;
 
 class User extends Model implements AuthenticatableContract, AuthorizableContract, JWTSubject
 {
@@ -59,8 +60,36 @@ class User extends Model implements AuthenticatableContract, AuthorizableContrac
         return [];
     }
 
-    // public function getEmailAttribute()
-    // {
-    //     return $this->acct_key;
-    // }
+    public function foodItems()
+    {
+        return FoodSelection::whereBetween('created_at', 
+                        [
+                            Carbon::now()->startOfWeek(), 
+                            Carbon::now()->endOfWeek()
+                        ])->where('user_id', auth()->user()->id)->get();
+    }
+
+    public function breakfast()
+    {
+        return MealTracker::whereDate('created_at', Carbon::today())
+        ->where('user_id', auth()->user()->id)
+        ->where('type', 'breakfast')
+        ->first();
+    }
+
+    public function lunch()
+    {
+        return MealTracker::whereDate('created_at', Carbon::today())
+        ->where('user_id', auth()->user()->id)
+        ->where('type', 'lunch')
+        ->first();
+    }
+
+    public function dinner()
+    {
+        return MealTracker::whereDate('created_at', Carbon::today())
+        ->where('user_id', auth()->user()->id)
+        ->where('type', 'dinner')
+        ->first();
+    }
 }
