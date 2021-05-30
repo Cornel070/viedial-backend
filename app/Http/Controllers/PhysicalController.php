@@ -23,7 +23,7 @@ class PhysicalController extends Controller
     	$workout_series = [];
     	$series = PhyCategory::all();
     	if ($series->isEmpty()) {
-    		return response()->json(['res_type'=>'not found', 'message'=>'No workout series yet.']);
+    		return response()->json(['res_type'=>'no content', 'message'=>'No workout series yet']);
     	}
     	foreach ($series as $serie) {
     		$data = [

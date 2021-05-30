@@ -131,7 +131,7 @@ $router->group(['prefix' => 'api'], function () use ($router) {
         // Physical Activity Routes
         $router->group(['prefix' => 'phy'], function () use ($router) {
             //Series
-            $router->post('/', ['uses' => 'PhysicalController@index']);
+            $router->get('/', ['uses' => 'PhysicalController@index']);
             $router->get('series/{id}/videos', ['uses' => 'PhysicalController@seriesWorkouts']);
             $router->get('series/{id}/comments', ['uses' => 'PhysicalController@seriesComments']);
             $router->get('series/{id}/like', ['uses' => 'PhysicalController@likeSeries']);
@@ -143,7 +143,7 @@ $router->group(['prefix' => 'api'], function () use ($router) {
             $router->get('video/{id}/like', ['uses' => 'PhysicalController@likeVideo']);
             $router->get('video/{id}/dislike', ['uses' => 'PhysicalController@dislikeVideo']);
             $router->get('workout/{id}/done', ['uses' => 'PhysicalController@doneWorkout']);//#######
-            $router->get('workout/{id}/undo', ['uses' => 'PhysicalController@undoWorkout']);//#######
+            $router->get('workout/{id}/undone', ['uses' => 'PhysicalController@undoWorkout']);//#######
         });
 
         // Update different parts of the apps
