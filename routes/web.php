@@ -21,6 +21,13 @@ $router->group(['prefix' => 'api'], function () use ($router) {
         // Educational Curriculum 
         $router->group(['prefix' => 'edu'], function () use ($router) {
             $router->post('create-series', ['uses' => 'EduController@createSeries']);
+            $router->post('series/{series_id}/video', ['uses' => 'EduController@saveVidoes']);
+        });
+
+        // Physical Activity 
+        $router->group(['prefix' => 'phy'], function () use ($router) {
+            $router->post('create-series', ['uses' => 'PhysicalController@createSeries']);
+            $router->post('series/{series_id}/video', ['uses' => 'PhysicalController@saveVidoes']);
         });
 
         // Meal Planning
@@ -111,6 +118,8 @@ $router->group(['prefix' => 'api'], function () use ($router) {
             //Videos
             $router->post('video/{id}/comment', ['uses' => 'EduController@commentOnVideo']);
             $router->get('video/{id}/comments', ['uses' => 'EduController@videoComments']);
+            $router->post('video-comment/{id}/reply', ['uses' => 'EduController@replyVideoComments']);
+            $router->get('video-comment/{id}', ['uses' => 'EduController@singleComment']);
             $router->get('video/{id}/like', ['uses' => 'EduController@likeVideo']);
             $router->get('video/{id}/dislike', ['uses' => 'EduController@dislikeVideo']);
         });
@@ -131,7 +140,7 @@ $router->group(['prefix' => 'api'], function () use ($router) {
         // Physical Activity Routes
         $router->group(['prefix' => 'phy'], function () use ($router) {
             //Series
-            $router->get('/', ['uses' => 'PhysicalController@index']);
+            $router->get('/', ['uses' => 'PhysicalController@newIndex']);
             $router->get('series/{id}/videos', ['uses' => 'PhysicalController@seriesWorkouts']);
             $router->get('series/{id}/comments', ['uses' => 'PhysicalController@seriesComments']);
             $router->get('series/{id}/like', ['uses' => 'PhysicalController@likeSeries']);
@@ -164,6 +173,7 @@ $router->group(['prefix' => 'api'], function () use ($router) {
             $router->get('suggestions', ['uses' => 'MealController@suggestMeals']);
             $router->get('{id}/eaten', ['uses' => 'MealController@markMealAsEaten']);
             $router->get('{id}/uneaten', ['uses' => 'MealController@markMealAsUneaten']);
+            $router->get('summary', ['uses' => 'MealController@geMealReport']);
         });
     });
 });

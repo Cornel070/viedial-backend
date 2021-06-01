@@ -7,6 +7,7 @@ use App\Models\Serie;
 use App\Models\Video;
 use App\Models\SerieComment;
 use App\Models\VideoComment;
+use App\Models\VidCommentReply;
 
 class EduController extends Controller
 {
@@ -91,6 +92,7 @@ class EduController extends Controller
     					'id'		=> $serie->id,
     					'title' 	=> $serie->title,
     					'category'	=> 'Type 2 Diabetes',
+                        'intro_vid' => $serie->intro_vid,
     					'videos_count'	=> $serie->videos->count(),
     					'likes'		=> $serie->likes,
     					'dislikes'	=> $serie->dislikes,
@@ -109,6 +111,7 @@ class EduController extends Controller
     					'id'		=> $serie->id,
     					'title' 	=> $serie->title,
     					'category'	=> 'Hypertension',
+                        'intro_vid' => $serie->intro_vid,
     					'videos_count'	=> $serie->videos->count(),
     					'likes'		=> $serie->likes,
     					'dislikes'	=> $serie->dislikes,
@@ -127,6 +130,7 @@ class EduController extends Controller
     					'id'		=> $serie->id,
     					'title' 	=> $serie->title,
     					'category'	=> $serie->category === 'diabetes'?'Type 2 Diabetes':'Hypertension',
+                        'intro_vid' => $serie->intro_vid,
     					'videos_count'	=> $serie->videos->count(),
     					'likes'		=> $serie->likes,
     					'dislikes'	=> $serie->dislikes,
@@ -179,11 +183,11 @@ class EduController extends Controller
     	$serie = Serie::find($id);
 
     	if (!$serie) {
-    		return response()->json(['res_type'=>'Not found', 'message'=>'Lecture series not found.'],404);
+    		return response()->json(['res_type'=>'Not found', 'message'=>'Lecture series not found.']);
     	}
 
     	if ($serie->comments->isEmpty()) {
-    		return response()->json(['res_type'=>'Not found', 'message'=>'No comments yet for this lecture series.'],404);
+    		return response()->json(['res_type'=>'Not found', 'message'=>'No comments yet for this lecture series.']);
     	}
 
     	$commData = [];
@@ -324,12 +328,81 @@ class EduController extends Controller
     	$video = Video::find($id);
 
     	if (!$video) {
-    		return response()->json(['res_type'=>'Not found', 'message'=>'Video not found.'],404);
+    		return response()->json(['res_type'=>'Not found', 'message'=>'Video not found.']);
     	}
 
     	$video->dislikes = $video->dislikes+1;
     	$video->save();
 
     	return response()->json(['res_type'=>'success', 'message'=>'Video disliked']);
+    }
+
+    public function replyVideoComments(Request $request, $id)
+    {
+        $validator = $this->validateReply($request);
+
+        if ($validator->fails())
+        {
+            return response()->json(['res_type'=> 'validator_error', 'errors'=>$validator->errors()->all()],422);
+        }
+
+        $reply = new VidCommentReply;
+        $reply->video_comment_id = $id;
+        $reply->user_id = $this->user->id;
+        $reply->reply_text = $request->reply_text;
+        $reply->save();
+
+        return response()->json(['res_type'=>'success', 'message'=>'Replied']);
+    }
+
+    public function validateReply(Request $request)
+    {
+        $msg = [
+            'reply_text.required' => 'Please enter a reply',
+            'reply_text.string'      => 'The reply must be a valid text'
+        ];
+        return validator()->make($request->all(), [
+            'reply_text' => 'required|string',
+        ], $msg);
+    }
+
+    public function singleComment($id)
+    {
+        $comment = VideoComment::find($id);
+
+        if (!$comment) {
+            return response()->json(['res_type'=> 'Not found', 'message'=>'Comment not found.'],404);
+        }
+
+        $commData = [];
+
+        if ($comment->replies->count() > 0) {
+            //get replies
+            $replyData = [];
+
+            foreach ($comment->replies as $reply) {
+                $replies = [
+                    'id'            => $reply->id,
+                    'video_comment_id'=> $comment->id,
+                    'by'            => $reply->user->annon_name,
+                    'reply_text'    => $reply->reply_text,
+                    'created_at'    => $reply->created_at,
+                ];
+                array_push($replyData, $replies);
+            }
+        }else{
+            array_push($replyData, 'No replies');
+        }
+
+        $data = [
+            'id'            => $comment->id,
+            'by'            => $comment->user->annon_name,
+            'comment_text'  => $comment->comment_text,
+            'replies'       => $replyData,
+            'created_at'    => $comment->created_at
+        ];
+        array_push($commData, $data);
+
+        return response()->json(['res_type'=>'success', 'comment'=>$commData]);
     }
 }

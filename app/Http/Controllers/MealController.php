@@ -10,6 +10,7 @@ use App\Models\MealItem;
 use App\Models\FoodSelection;
 use App\Models\MealTracker;
 use Carbon\Carbon;
+use App\Models\MealSummary;
 
 class MealController extends Controller
 {
@@ -183,7 +184,7 @@ class MealController extends Controller
                 get percentage of items to be found in a meal
                 50%
             */
-            $percentage = ceil(( count($food_items) * 50) / 100);
+            $percentage = ceil(( count($food_items) * 10) / 100);
 
 
             /*
@@ -232,6 +233,24 @@ class MealController extends Controller
         $tracker->type = $meal->type;
         $tracker->save();
 
+        $summary = MealSummary::whereDate('created_at', Carbon::today())->first();
+
+        if (!$summary) {
+            $summary = new MealSummary;
+            $summary->user_id = $this->user->id;
+            $summary->meal_id = $meal->id;
+        }
+
+        if ($meal->type == 'breakfast') {
+            $summary->breakfast = 'yes';
+        }elseif ($meal->type == 'lunch') {
+            $summary->lunch = 'yes';
+        }elseif ($meal->type == 'dinner') {
+            $summary->dinner = 'yes';
+        }
+
+        $summary->save();
+
         return response()->json(['res_type'=>'success', 'message'=>'Eaten']);
     }
 
@@ -247,6 +266,24 @@ class MealController extends Controller
         ->whereDate('created_at', Carbon::today())
         ->first();
 
+        $summary = MealSummary::whereDate('created_at', Carbon::today())->first();
+
+        if (!$summary) {
+            $summary = new MealSummary;
+            $summary->user_id = $this->user->id;
+            $summary->meal_id = $meal->id;
+        }
+
+        if ($meal->type == 'breakfast') {
+            $summary->breakfast = null;
+        }elseif ($meal->type == 'lunch') {
+            $summary->lunch = null;
+        }elseif ($meal->type == 'dinner') {
+            $summary->dinner = null;
+        }
+
+        $summary->save();
+
         if (!$tracked) {
             return response()->json(['res_type'=>'not tracked', 'message'=>'Meal not previously eaten']);
         }
@@ -254,5 +291,11 @@ class MealController extends Controller
         $tracked->delete();
 
         return response()->json(['res_type'=>'success', 'message'=>'Uneaten']);
+    }
+
+    public function geMealReport()
+    {
+        $summary = MealSummary::where('user_id', $this->user->id)->get();
+        return response()->json(['res_type'=>'success', 'summary'=>$summary]);
     }
 }

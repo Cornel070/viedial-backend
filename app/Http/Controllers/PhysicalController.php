@@ -8,6 +8,7 @@ use App\Models\Workout;
 use App\Models\PhyComment;
 use App\Models\WorkoutComment;
 use App\Models\WorkoutTracker;
+use Carbon\Carbon;
 
 class PhysicalController extends Controller
 {
@@ -17,6 +18,63 @@ class PhysicalController extends Controller
 	{
 		$this->user = auth()->user();
 	}
+
+    public function createSeries(Request $request)
+    {
+        $validator = $this->validateSeries($request);
+
+        if ($validator->fails())
+        {
+            return response()->json(['res_type'=> 'validator_error', 'errors'=>$validator->errors()->all()], 422);
+        }
+
+        $series = new PhyCategory;
+        $series->title = $request->title;
+        $series->save();
+
+        if ($request->has('videos')) {
+            $this->saveVidoes($request, $series->id, true);
+        }
+
+        return response()->json(['res_type'=>'success', 'message'=>'Series created']);
+    }
+
+    public function validateSeries(Request $request)
+    {
+        $msg = [
+            'title.required' => 'Title is required',
+            'title.string'   => 'Title must be valid text',
+        ];
+
+        return validator()->make($request->all(), [
+            'title' => 'required|string',
+        ],$msg);
+    }
+
+    public function saveVidoes(Request $request, $series_id, $w = false)
+    {
+        $vidArr = [];
+        foreach ($request['videos'] as $key => $value) {
+            $vidName = time().'.'.$request->videos[$key]->extension();  
+            $request->videos[$key]->move('assets/vids/phy', $vidName);
+            array_push($vidArr, [
+                'phy_category_id' => $series_id,
+                'title'    => $request['titles'][$key],
+                'workout_url'=> env('PUBLIC_DIR').'assets/vids/phy/'.$vidName,
+            ]);
+        }
+
+        for ($i = 0; $i < count($vidArr); $i++) { 
+            Workout::create($vidArr[$i]);
+        }
+
+        // call was from within the class - another function
+        if ($w) {
+            return true;
+        }
+
+        return response()->json(['res_type'=>'success', 'message'=>'Video added']);
+    }
 
     public function index()
     {
@@ -38,6 +96,39 @@ class PhysicalController extends Controller
     		array_push($workout_series, $data);
     	}
     	return response()->json(['res_type'=>'success', 'series'=>$workout_series]);
+    }
+
+    public function newIndex()
+    {
+        $workouts = Workout::all();
+        if ($workouts->isEmpty()) {
+            return response()->json(['res_type'=>'not found', 'message'=>'No workout videos yet']);
+        }
+        $vidData = [];
+        foreach ($workouts as $video) {
+            $done = false;
+            $tracked = WorkoutTracker::whereDate('created_at', Carbon::today())
+            ->where('workout_id', $video->id)
+            ->where('user_id', $this->user->id)
+            ->first();
+            if ($tracked) {
+                $done = true;
+            }
+            $data = [
+                'id'         => $video->id,
+                'title'      => $video->title,
+                'workout_url'=> $video->workout_url,
+                'calorie_burn'=> $video->calorie_burn,
+                'done'        => $done,
+                'likes'      => $video->likes,
+                'dislikes'   => $video->dislikes,
+                'comments_count'=> $video->comments->count(),
+                'created_at'    => $video->created_at,
+            ];
+            array_push($vidData, $data);
+        }
+
+        return response()->json(['res_type'=>'success', 'videos'=>$vidData]);
     }
 
     public function seriesWorkouts($id)
@@ -69,7 +160,7 @@ class PhysicalController extends Controller
     			'workout_url'=> $video->workout_url,
                 'calorie_burn'=> $video->calorie_burn,
                 'done'        => $done,
-    			'likes'		 => $vide0->likes,
+    			'likes'		 => $video->likes,
     			'dislikes'	 => $video->dislikes,
     			'comments_count'=> $video->comments->count(),
                 'created_at'    => $video->created_at,

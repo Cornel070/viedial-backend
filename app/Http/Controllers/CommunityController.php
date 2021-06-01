@@ -238,13 +238,13 @@ class CommunityController extends Controller
 		    	array_push($replyData, $replies);
 		    }
 	    }else{
-	    	$replyData = 'No replies';
+	    	array_push($replyData, 'No replies');
 	    }
 
     	$data = [
     		'id'			=> $comment->id,
     		'by'			=> $comment->user->annon_name,
-    		'comment_text'	=> $comment->reply_text,
+    		'comment_text'	=> $comment->comment_text,
     		'replies'		=> $replyData,
     		'created_at'	=> $comment->created_at
     	];
