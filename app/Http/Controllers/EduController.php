@@ -31,7 +31,7 @@ class EduController extends Controller
         $series->category = $request->category;
         $series->save();
 
-        if ($request->has('video_urls')) {
+        if ($request->has('videos')) {
             $this->saveVidoes($request, $series->id, true);
         }
 
@@ -56,11 +56,13 @@ class EduController extends Controller
     public function saveVidoes(Request $request, $series_id, $w = false)
     {
         $vidArr = [];
-        foreach ($request['video_urls'] as $key => $value) {
+        foreach ($request['videos'] as $key => $value) {
+            $vidName = time().'.'.$request->videos[$key]->extension();  
+            $request->videos[$key]->move('assets/vids/edu', $vidName);
             array_push($vidArr, [
                 'serie_id' => $series_id,
                 'title'    => $request['titles'][$key],
-                'video_url'=> $request['video_urls'][$key],
+                'video_url'=> env('PUBLIC_DIR').'assets/vids/edu/'.$vidName,
             ]);
         }
 
