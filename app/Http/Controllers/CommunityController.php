@@ -70,15 +70,58 @@ class CommunityController extends Controller
     	$postData = [];
 
     	foreach ($posts as $post) {
-    		$data = [
-    			'id'			=> $post->id,
-    			'topic' 		=> $post->topic,
-    			'by'			=> $post->user->annon_name,
-    			'post_text'		=> $post->post_text,
-    			'comments_count'=> $post->comments->count(),
-    			'created_at'	=>$post->created_at
-    		];
-    		array_push($postData, $data);
+
+            if ($post->comments->count() > 0) {
+                //get comments
+                $commData = [];
+
+                foreach ($post->comments as $comm) {
+                    //comment replies
+                    $replyData = [];
+                    if ($comm->replies->count() > 0 ) {
+                        foreach ($comm->replies as $reply) {
+                            $replies = [
+                                'id'            => $reply->id,
+                                'by'            => $reply->user->annon_name,
+                                'reply_text'    => $reply->reply_text,
+                                'likes'         => (int) $reply->likes,
+                                'dislikes'      => (int) $reply->dislikes,
+                                'created_at'    => $reply->created_at,
+                            ];
+                            array_push($replyData, $replies);
+                        }
+                    }else{
+                        $replyData = null;
+                    }
+
+                    $comms = [
+                        'id'            => $comm->id,
+                        'post_id'       => $post->id,
+                        'by'            => $comm->user->annon_name,
+                        'comment_text'  => $comm->comment_text,
+                        'created_at'    => $comm->created_at,
+                        'likes'         => (int) $comm->likes,
+                        'dislikes'      => (int) $comm->dislikes,
+                        'replies'       => $replyData,
+                    ];
+                    array_push($commData, $comms);
+                }
+            }else{
+                $commData = null;
+            }
+
+            $data = [
+                'id'            => $post->id,
+                'topic'         => $post->topic,
+                'category'      => $post->category,
+                'by'            => $post->user->annon_name,
+                'post_text'     => $post->post_text,
+                'likes'         => $post->likes,
+                'dislikes'      => $post->dislikes,
+                'comments'      => $commData,
+                'created_at'    =>$post->created_at
+            ];
+            array_push($postData, $data);
     	}
 
     	return response()->json(['res_type'=>'success', 'posts'=>$postData]);
@@ -99,17 +142,36 @@ class CommunityController extends Controller
 	    	$commData = [];
 
 	    	foreach ($post->comments as $comm) {
+                //comment replies
+                $replyData = [];
+                if ($comm->replies->count() > 0 ) {
+                    foreach ($comm->replies as $reply) {
+                        $replies = [
+                            'id'            => $reply->id,
+                            'by'            => $reply->user->annon_name,
+                            'reply_text'    => $reply->reply_text,
+                            'created_at'    => $reply->created_at,
+                        ];
+                        array_push($replyData, $replies);
+                    }
+                }else{
+                    $replyData = null;
+                }
+
 	    		$comms = [
 	    			'id'			=> $comm->id,
 	    			'post_id'		=> $post->id,
 	    			'by'			=> $comm->user->annon_name,
 	    			'comment_text'	=> $comm->comment_text,
 	    			'created_at'	=> $comm->created_at,
+                    'likes'         => $comm->likes,
+                    'dislikes'      => $comm->dislikes,
+                    'replies'       => $replyData,
 	    		];
 	    		array_push($commData, $comms);
 	    	}
     	}else{
-    		$commData = 'No comments';
+    		$commData = null;
     	}
 
     	$data = [
@@ -251,5 +313,89 @@ class CommunityController extends Controller
     	array_push($commData, $data);
 
     	return response()->json(['res_type'=>'success', 'comment'=>$commData]);
+    }
+
+    public function likeComment($id)
+    {
+        $comment = Comment::find($id);
+
+        if (!$comment) {
+            return response()->json(['res_type'=>'not found', 'message'=>'Comment not found.']);
+        }
+
+        $comment->likes = $comment->likes+1;
+        $comment->save();
+
+        return response()->json(['res_type'=>'success', 'message'=>'Comment liked']);
+    }
+
+    public function dislikeComment($id)
+    {
+        $comment = Comment::find($id);
+
+        if (!$comment) {
+            return response()->json(['res_type'=>'not found', 'message'=>'Comment not found.']);
+        }
+
+        $comment->likes = $comment->dislikes+1;
+        $comment->save();
+
+        return response()->json(['res_type'=>'success', 'message'=>'Comment disliked']);
+    }
+
+    public function likePost($id)
+    {
+        $post = Post::find($id);
+
+        if (!$post) {
+            return response()->json(['res_type'=>'not found', 'message'=>'Post not found.']);
+        }
+
+        $post->likes = $post->likes+1;
+        $post->save();
+
+        return response()->json(['res_type'=>'success', 'message'=>'Post liked']);
+    }
+
+    public function dislikePost($id)
+    {
+        $post = Post::find($id);
+
+        if (!$post) {
+            return response()->json(['res_type'=>'not found', 'message'=>'Post not found.']);
+        }
+
+        $post->dislikes = $post->dislikes+1;
+        $post->save();
+
+        return response()->json(['res_type'=>'success', 'message'=>'Post disliked']);
+    }
+
+    public function likeCommentReply($id)
+    {
+        $reply = Reply::find($id);
+
+        if (!$reply) {
+            return response()->json(['res_type'=>'not found', 'message'=>'Reply not found.']);
+        }
+
+        $reply->likes = $reply->likes+1;
+        $reply->save();
+
+        return response()->json(['res_type'=>'success', 'message'=>'Reply liked']);
+    }
+
+    public function dislikeCommentReply($id)
+    {
+        $reply = Reply::find($id);
+
+        if (!$reply) {
+            return response()->json(['res_type'=>'not found', 'message'=>'Reply not found.']);
+        }
+
+        $reply->dislikes = $reply->dislikes+1;
+        $reply->save();
+
+        return response()->json(['res_type'=>'success', 'message'=>'Reply disliked']);
     }
 }

@@ -30,6 +30,9 @@ $app->withFacades();
 
 $app->withEloquent();
 
+class_alias(\LaravelFCM\Facades\FCM::class, 'FCM');
+class_alias(\LaravelFCM\Facades\FCMGroup::class, 'FCMGroup');
+
 /*
 |--------------------------------------------------------------------------
 | Register Container Bindings
@@ -107,6 +110,7 @@ $app->register(App\Providers\AuthServiceProvider::class);
 $app->register(App\Providers\EventServiceProvider::class);
 $app->register(Flipbox\LumenGenerator\LumenGeneratorServiceProvider::class);
 $app->register(Illuminate\Mail\MailServiceProvider::class);
+$app->register(LaravelFCM\FCMServiceProvider::class);
 
 /*
 |--------------------------------------------------------------------------

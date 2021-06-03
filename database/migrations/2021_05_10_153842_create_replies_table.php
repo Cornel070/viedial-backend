@@ -18,6 +18,8 @@ class CreateRepliesTable extends Migration
             $table->unsignedBigInteger('comment_id');
             $table->unsignedBigInteger('user_id');
             $table->string('reply_text');
+            $table->integer('likes')->default(0);
+            $table->integer('dislikes')->default(0);
             $table->timestamps();
             $table->foreign('comment_id')->references('id')->on('comments')->onDelete('cascade')->onUpdate('no action');
             $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade')->onUpdate('no action');

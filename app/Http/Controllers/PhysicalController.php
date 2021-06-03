@@ -306,10 +306,10 @@ class PhysicalController extends Controller
     	$video = Workout::find($id);
 
     	if (!$video) {
-    		return response()->json(['res_type'=>'Not found', 'message'=>'Workout not found.'],404);
+    		return response()->json(['res_type'=>'not found', 'message'=>'Workout not found.']);
     	}
 
-    	$video->likes = $svideo->likes+1;
+    	$video->likes = $video->likes+1;
     	$video->save();
 
     	return response()->json(['res_type'=>'success', 'message'=>'Workout liked']);
@@ -320,20 +320,20 @@ class PhysicalController extends Controller
     	$video = Workout::find($id);
 
     	if (!$video) {
-    		return response()->json(['res_type'=>'not found', 'message'=>'Workout not found'],404);
+    		return response()->json(['res_type'=>'not found', 'message'=>'Workout not found']);
     	}
 
-    	$video->dislikes = $svideo->dislikes+1;
+    	$video->dislikes = $video->dislikes+1;
     	$video->save();
 
     	return response()->json(['res_type'=>'success', 'message'=>'Workout disliked']);
     }
 
-    public function doneWorkout($id)
+    public function doneWorkout($id, $w = false)
     {
         $video = Workout::find($id);
         if (!$video) {
-            return response()->json(['res_type'=>'not found', 'message'=>'Workout not found'],404);
+            return response()->json(['res_type'=>'not found', 'message'=>'Workout not found']);
         }
 
         WorkoutTracker::create([
@@ -341,14 +341,27 @@ class PhysicalController extends Controller
             'workout_id'=> $id
         ]);
 
+        if ($w) {
+            return true;
+        }
+
         return response()->json(['res_type'=>'success', 'message'=>'Workout done']);
     }
 
-    public function undoWorkout($id)
+    public function multiDoneWorkouts(Request $request)
+    {
+        foreach ($request->videos as $vid) {
+            $this->doneWorkout($vid, true);
+        }
+
+        return response()->json(['res_type'=>'success', 'message'=>'Workouts done']);
+    }
+
+    public function undoWorkout($id, $w = false)
     {
         $video = Workout::find($id);
         if (!$video) {
-            return response()->json(['res_type'=>'not found', 'message'=>'Workout not found'],404);
+            return response()->json(['res_type'=>'not found', 'message'=>'Workout not found']);
         }
 
         $tracked = WorkoutTracker::whereDate('created_at', Carbon::today())
@@ -357,11 +370,27 @@ class PhysicalController extends Controller
         ->first();
 
         if (!$tracked) {
+            if ($w) {
+                return false;
+            }
             return response()->json(['res_type'=>'not done', 'message'=>'Workout was previously not done']);
         }
 
         $tracked->delete();
 
+        if ($w) {
+            return true;
+        }
+
         return response()->json(['res_type'=>'success', 'message'=>'Workout undone']);
+    }
+
+    public function multiUnDoneWorkouts(Request $request)
+    {
+        foreach ($request->videos as $vid) {
+            $this->undoWorkout($vid, true);
+        }
+
+        return response()->json(['res_type'=>'success', 'message'=>'Workouts undone']);
     }
 }

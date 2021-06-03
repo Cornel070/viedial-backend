@@ -8,6 +8,10 @@ use Illuminate\Http\Request;
 use App\Models\Telemonitoring;
 use App\Models\WorkoutTracker;
 use App\Models\MealTracker;
+use LaravelFCM\Message\OptionsBuilder;
+use LaravelFCM\Message\PayloadDataBuilder;
+use LaravelFCM\Message\PayloadNotificationBuilder;
+use FCM;
 
 class NotificationController extends Controller
 {
@@ -144,5 +148,44 @@ class NotificationController extends Controller
 
 
         return response()->json(['res_type'=>'success', 'summaries'=>$summary]);
+    }
+
+    public static function push($device_token, $roomName, $caller)
+    {
+        $optionBuilder = new OptionsBuilder();
+        $optionBuilder->setTimeToLive(50);
+
+        $notificationBuilder = new PayloadNotificationBuilder($caller);
+        $notificationBuilder->setBody('Viedial video call')
+                            ->setSound('default');
+
+        $dataBuilder = new PayloadDataBuilder();
+        $dataBuilder->addData(['roomName' => $roomName]);
+
+        $option = $optionBuilder->build();
+        $notification = $notificationBuilder->build();
+        $data = $dataBuilder->build();
+
+        $token = $device_token;
+
+        $downstreamResponse = FCM::sendTo($token, $option, $notification, $data);
+
+        $downstreamResponse->numberSuccess();
+        $downstreamResponse->numberFailure();
+        $downstreamResponse->numberModification();
+
+        // return Array - you must remove all this tokens in your database
+        $downstreamResponse->tokensToDelete();
+
+        // return Array (key : oldToken, value : new token - you must change the token in your database)
+        $downstreamResponse->tokensToModify();
+
+        // return Array - you should try to resend the message to the tokens in the array
+        $downstreamResponse->tokensToRetry();
+
+        // return Array (key:token, value:error) - in production you should remove from your database the tokens
+        $downstreamResponse->tokensWithError();
+
+        return true;
     }
 }

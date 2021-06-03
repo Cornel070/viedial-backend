@@ -92,4 +92,11 @@ class User extends Model implements AuthenticatableContract, AuthorizableContrac
         ->where('type', 'dinner')
         ->first();
     }
+
+    public function workouts()
+    {
+        return WorkoutTracker::whereDate('created_at', Carbon::today())
+        ->where('user_id', auth()->user()->id)
+        ->get();
+    }
 }

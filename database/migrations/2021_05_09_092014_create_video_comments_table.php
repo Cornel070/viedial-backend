@@ -18,6 +18,8 @@ class CreateVideoCommentsTable extends Migration
             $table->unsignedBigInteger('video_id');
             $table->unsignedBigInteger('user_id');
             $table->text('comment_text');
+            $table->integer('likes')->default(0);
+            $table->integer('dislikes')->default(0);
             $table->timestamps();
             $table->foreign('video_id')->references('id')->on('videos')->onDelete('cascade')->onUpdate('no action');
             $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade')->onUpdate('no action');

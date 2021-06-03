@@ -18,6 +18,8 @@ class CreateVidCommentRepliesTable extends Migration
             $table->unsignedBigInteger('video_comment_id');
             $table->unsignedBigInteger('user_id');
             $table->string('reply_text');
+            $table->integer('likes')->default(0);
+            $table->integer('dislikes')->default(0);
             $table->timestamps();
             $table->foreign('video_comment_id')->references('id')->on('video_comments')->onDelete('cascade')->onUpdate('no action');
             $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade')->onUpdate('no action');

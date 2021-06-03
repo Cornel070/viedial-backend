@@ -13,6 +13,8 @@ use App\Models\VidMeetingsUser;
 use App\Events\VideoStarted;
 use App\Models\VideoCall;
 use App\Models\User;
+use App\Models\VideoCallLog;
+use App\Http\Controllers\NotificationController;
 
 class CommController extends Controller
 {
@@ -37,18 +39,21 @@ class CommController extends Controller
 
 	public function makeVidCall(Request $request, $vendor_id)
     {
-    	$video_call = $this->createVidMeeting($this->user->id, $vendor_id);
-    	return $this->joinVidMeeting($video_call->room_name);
+    	$device_token = $request->device_token;
+    	$recipient_name = $request->recipient;
+
+    	$video_call = $this->createVidMeeting($recipient_name);
+    	return $this->joinVidMeeting($video_call->room_name, $device_token);
     }
 
-	public function createVidMeeting($user_id, $vendor_id)
+	public function createVidMeeting($recipient_name)
     {
        $roomName = $this->generateVidGroup();
 
-       $video_call = New VideoCall;
+       $video_call = New VideoCallLog;
        $video_call->room_name = $roomName;
-       $video_call->user_id = $user_id;
-       $video_call->vendor_id = $vendor_id;
+       $video_call->caller = $this->user->name;
+       $video_call->recipient = $recipient_name;
        $video_call->call_date = Carbon::now();
        $video_call->save();
 
@@ -78,9 +83,7 @@ class CommController extends Controller
     }
 
     // Join video meeting function
-    // @ within entails if the function was called from another function in the program
-    // or if it ws called from a function from the route
-    public function joinVidMeeting($roomName)
+    public function joinVidMeeting($roomName, $device_token = null)
     {
        $identity = $this->user->name;
 	   $token = new AccessToken($this->sid, $this->key, $this->secret, 3600, $identity);
@@ -89,10 +92,15 @@ class CommController extends Controller
 	   $videoGrant->setRoom($roomName);
 
 	   $token->addGrant($videoGrant);
-	   $call = VideoCall::where('room_name', $roomName)->first();
+	   $call = VideoCallLog::where('room_name', $roomName)->first();
 
 	   if ($call) {
-		   	broadcast(new VideoStarted($identity, $call))->toOthers();
+		   	// broadcast(new VideoStarted($identity, $call))->toOthers();
+
+	   		if ($device_token) {
+	   			// send the push notification here
+	   			NotificationController::push($device_token, $roomName, $identity);
+	   		}
 
 		   	return response()->json([
 		   		'res_type'=>'success', 'accessToken'=> $token->toJWT(), 

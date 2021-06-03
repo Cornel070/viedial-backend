@@ -83,7 +83,7 @@ $router->group(['prefix' => 'api'], function () use ($router) {
         $router->group(['prefix' => 'comm'], function () use ($router) {
             //Video Calls
             $router->post('create-vid-meeting', ['uses' => 'CommController@createVidMeeting']);
-            $router->get('make-vid-call/{vendor_id}', ['uses' => 'CommController@makeVidCall']);
+            $router->post('make-vid-call', ['uses' => 'CommController@makeVidCall']);
             $router->get('join-vid-call/{roomName}', ['uses' => 'CommController@joinVidMeeting']);
             // Voice Calls
             $router->get('voice-call/{number}', ['uses' => 'CommController@makeVoiceCall']);//research how to mmake in-app calls
@@ -120,8 +120,12 @@ $router->group(['prefix' => 'api'], function () use ($router) {
             $router->get('video/{id}/comments', ['uses' => 'EduController@videoComments']);
             $router->post('video-comment/{id}/reply', ['uses' => 'EduController@replyVideoComments']);
             $router->get('video-comment/{id}', ['uses' => 'EduController@singleComment']);
+            $router->get('video-comment/{id}/like', ['uses' => 'EduController@likeComment']);
+            $router->get('video-comment/{id}/dislike', ['uses' => 'EduController@dislikeComment']);
             $router->get('video/{id}/like', ['uses' => 'EduController@likeVideo']);
             $router->get('video/{id}/dislike', ['uses' => 'EduController@dislikeVideo']);
+            $router->get('video-reply/{id}/like', ['uses' => 'EduController@likeVideoCommtReply']);
+            $router->get('video-reply/{id}/dislike', ['uses' => 'EduController@dislikeVideoCommtReply']);
         });
 
         // Viedial Community Routes
@@ -131,10 +135,16 @@ $router->group(['prefix' => 'api'], function () use ($router) {
             $router->get('topics', ['uses' => 'CommunityController@getTopics']);
             $router->get('posts', ['uses' => 'CommunityController@allPosts']);
             $router->get('post/{id}', ['uses' => 'CommunityController@singlePost']);
+            $router->get('post/{id}/like', ['uses' => 'CommunityController@likePost']);
+            $router->get('post/{id}/dislike', ['uses' => 'CommunityController@dislikePost']);
             $router->post('post/{id}/comment', ['uses' => 'CommunityController@commentOnPost']);
             $router->get('post/{id}/comments', ['uses' => 'CommunityController@getPostComments']);
             $router->post('comment/{id}/reply', ['uses' => 'CommunityController@sendReply']);
             $router->get('comment/{id}', ['uses' => 'CommunityController@singleComment']);
+            $router->get('comment/{id}/like', ['uses' => 'CommunityController@likeComment']);
+            $router->get('comment/{id}/dislike', ['uses' => 'CommunityController@dislikeComment']);
+            $router->get('reply/{id}/like', ['uses' => 'CommunityController@likeCommentReply']);
+            $router->get('reply/{id}/dislike', ['uses' => 'CommunityController@dislikeCommentReply']);
         });
 
         // Physical Activity Routes
@@ -151,8 +161,10 @@ $router->group(['prefix' => 'api'], function () use ($router) {
             $router->get('video/{id}/comments', ['uses' => 'PhysicalController@workoutComments']);
             $router->get('video/{id}/like', ['uses' => 'PhysicalController@likeVideo']);
             $router->get('video/{id}/dislike', ['uses' => 'PhysicalController@dislikeVideo']);
-            $router->get('workout/{id}/done', ['uses' => 'PhysicalController@doneWorkout']);//#######
-            $router->get('workout/{id}/undone', ['uses' => 'PhysicalController@undoWorkout']);//#######
+            $router->get('video/{id}/done', ['uses' => 'PhysicalController@doneWorkout']);
+            $router->post('done-videos', ['uses' => 'PhysicalController@multiDoneWorkouts']);//#######
+            $router->get('video/{id}/undone', ['uses' => 'PhysicalController@undoWorkout']);
+            $router->post('undone-videos', ['uses' => 'PhysicalController@multiUnDoneWorkouts']);//#######
         });
 
         // Update different parts of the apps
@@ -174,6 +186,11 @@ $router->group(['prefix' => 'api'], function () use ($router) {
             $router->get('{id}/eaten', ['uses' => 'MealController@markMealAsEaten']);
             $router->get('{id}/uneaten', ['uses' => 'MealController@markMealAsUneaten']);
             $router->get('summary', ['uses' => 'MealController@geMealReport']);
+        });
+
+        // App Dashboard Route
+        $router->group(['prefix' => 'dash'], function () use ($router) {
+            $router->get('/', ['uses' => 'UpdateController@dashboard']);
         });
     });
 });

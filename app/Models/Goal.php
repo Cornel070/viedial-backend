@@ -35,4 +35,9 @@ class Goal extends Model
     {
         return $this->attributes['weekly_deficit'] = (float) $val;
     }
+
+    public function user()
+    {
+        return $this->belongsTo(User::class);
+    }
 }

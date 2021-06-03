@@ -286,24 +286,45 @@ class EduController extends Controller
     	$video = Video::find($id);
 
     	if (!$video) {
-    		return response()->json(['res_type'=>'Not found', 'message'=>'Video not found.'],404);
+    		return response()->json(['res_type'=>'Not found', 'message'=>'Video not found.']);
     	}
 
     	if ($video->comments->isEmpty()) {
-    		return response()->json(['res_type'=>'Not found', 'message'=>'No comments yet for this video.'],404);
+    		return response()->json(['res_type'=>'Not found', 'message'=>'No comments yet for this video.']);
     	}
 
     	$commData = [];
 
     	foreach ($video->comments as $comm) {
-    		$data = [
-    			'id'		 => $comm->id,
-    			'video_id'	 => $comm->video_id,
-    			'by'	 	 => $comm->user->annon_name,
-    			'comment_text'	 => $comm->comment_text,
-                'created_at'      => $comm->created_at,
-    		];
-    		array_push($commData, $data);
+            if ($comm->replies->count() > 0) {
+                //get replies
+                $replyData = [];
+
+                foreach ($comm->replies as $reply) {
+                    $replies = [
+                        'id'            => $reply->id,
+                        'by'            => $reply->user->annon_name,
+                        'reply_text'    => $reply->reply_text,
+                        'likes'         => $reply->likes,
+                        'dislikes'      => $reply->dislikes,
+                        'created_at'    => $reply->created_at,
+                    ];
+                    array_push($replyData, $replies);
+                }
+            }else{
+                $replyData = null;
+            }
+
+            $data = [
+                'id'            => $comm->id,
+                'by'            => $comm->user->annon_name,
+                'comment_text'  => $comm->comment_text,
+                'likes'         => $comm->likes,
+                'dislikes'      => $comm->dislikes,
+                'created_at'    => $comm->created_at,
+                'replies'       => $replyData
+            ];
+            array_push($commData, $data);
     	}
 
     	return response()->json(['res_type'=>'success', 'comments'=>$commData]);
@@ -391,18 +412,74 @@ class EduController extends Controller
                 array_push($replyData, $replies);
             }
         }else{
-            array_push($replyData, 'No replies');
+            $replyData = null;
         }
 
         $data = [
             'id'            => $comment->id,
             'by'            => $comment->user->annon_name,
             'comment_text'  => $comment->comment_text,
-            'replies'       => $replyData,
-            'created_at'    => $comment->created_at
+            'created_at'    => $comment->created_at,
+            'replies'       => $replyData
         ];
         array_push($commData, $data);
 
         return response()->json(['res_type'=>'success', 'comment'=>$commData]);
+    }
+
+    public function likeComment($id)
+    {
+        $comment = VideoComment::find($id);
+
+        if (!$comment) {
+            return response()->json(['res_type'=>'not found', 'message'=>'Comment not found']);
+        }
+
+        $comment->likes = $comment->likes+1;
+        $comment->save();
+
+        return response()->json(['res_type'=>'success', 'message'=>'Comment liked']);
+    }
+
+    public function dislikeComment($id)
+    {
+        $comment = VideoComment::find($id);
+
+        if (!$comment) {
+            return response()->json(['res_type'=>'not found', 'message'=>'Comment not found']);
+        }
+
+        $comment->likes = $comment->dislikes+1;
+        $comment->save();
+
+        return response()->json(['res_type'=>'success', 'message'=>'Comment disliked']);
+    }
+
+    public function likeVideoCommtReply($id)
+    {
+        $reply = VidCommentReply::find($id);
+
+        if (!$reply) {
+            return response()->json(['res_type'=>'not found', 'message'=>'Reply not found']);
+        }
+
+        $reply->likes = $reply->likes+1;
+        $reply->save();
+
+        return response()->json(['res_type'=>'success', 'message'=>'Reply liked']);
+    }
+
+    public function dislikeVideoCommtReply($id)
+    {
+        $reply = VidCommentReply::find($id);
+
+        if (!$reply) {
+            return response()->json(['res_type'=>'not found', 'message'=>'Reply not found']);
+        }
+
+        $reply->likes = $reply->dislikes+1;
+        $reply->save();
+
+        return response()->json(['res_type'=>'success', 'message'=>'Reply disliked']);
     }
 }
