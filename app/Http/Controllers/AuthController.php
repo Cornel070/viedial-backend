@@ -18,14 +18,11 @@ use Illuminate\Support\Facades\Crypt;
 
 class AuthController extends Controller
 {
-    use ApiResponse;
-
     /**
      * Create a new controller instance.
      *
      * @return void
      */
-    private $authService;
 
     public function __construct(AuthService $authService)
     {

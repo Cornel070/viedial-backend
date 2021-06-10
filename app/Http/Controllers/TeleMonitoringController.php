@@ -224,6 +224,11 @@ class TeleMonitoringController extends Controller
         $record->weight = $weight;
         $record->save();
 
+        if ($record->weight <= $this->user->goal()->target_weight) {
+            $this->user->goal()->status = 'completed';
+            return response()->json(['res_type'=> 'success', 'message'=>'Well done! You have met your weight goal']);
+        }
+
         return response()->json(['res_type'=> 'success', 'message'=>'Weight saved.']);
     }
 

@@ -155,7 +155,7 @@ class MealController extends Controller
 
     private function makeSuggestion($meal_type)
     {
-        $user_food_items = $this->user->foodItems();
+        $user_food_items = $this->user->foodItems;
         $meals = Meal::where('type', $meal_type)->get();
         $meal_data = [];
 
@@ -169,7 +169,7 @@ class MealController extends Controller
             }
 
             /*
-                check if the user selected food items are available in the meal
+                Check if the user selected food items are available in the meal
                 and keep track
             */
             $i = 0.0;
@@ -182,7 +182,7 @@ class MealController extends Controller
 
             /*
                 get percentage of items to be found in a meal
-                50%
+                10%
             */
             $percentage = ceil(( count($food_items) * 10) / 100);
 

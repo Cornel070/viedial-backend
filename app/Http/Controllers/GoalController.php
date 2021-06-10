@@ -54,11 +54,12 @@ class GoalController extends Controller
             'target_weight.required' => 'The target weight is required',
             'target_weight.required' => 'The target weight must be a valid number',
             'weekly_deficit.integer'=> 'Please set a weekly weight deficit',
-            'title.required'        => 'A title is required for the goal'
+            'title.required'        => 'A title is required for the goal',
+            'target_weight.lt'      => 'The target weight must be less than the current weight'
         ];
         return validator()->make($request->all(), [
             'current_weight' => 'required|integer',
-            'target_weight'  => 'required|integer',
+            'target_weight'  => 'required|integer|lt:current_weight',
             'weekly_deficit' => 'required',
             'title'			 => 'required|string',
         ],$msg);

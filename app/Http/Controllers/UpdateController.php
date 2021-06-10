@@ -258,17 +258,17 @@ class UpdateController extends Controller
         /*
             Leaderboard
         */
-        $goal_users = Goal::where('status', 'in progress')->get();
+        $goal_users = Goal::where('status', 'in progress')->orderBy('calorie_burned_this_week', 'desc')->limit(3)->get();
         $board = [];
 
         foreach ($goal_users as $goal) {
-            $burned = 0;
-            foreach ($goal->user->workouts() as $done) {
-                $burned = $burned + (int) $done->workout->calorie_burn;
-            }
+            // $burned = 0;
+            // foreach ($goal->user->workouts() as $done) {
+            //     $burned = $burned + (int) $done->workout->calorie_burn;
+            // }
             $data = [
                 'name'  => $goal->user->annon_name,
-                'burned'=> $burned
+                'burned'=> (int) $goal->calorie_burned_this_week
             ];
 
             array_push($board, $data);

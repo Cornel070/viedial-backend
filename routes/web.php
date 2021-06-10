@@ -62,6 +62,13 @@ $router->group(['prefix' => 'api'], function () use ($router) {
 
     $router->group(['middleware' => ['auth']], function () use ($router) {
 
+        // Payment Routes
+        $router->group(['prefix' => 'pay'], function () use ($router) {
+            $router->post('stripe/onetime', ['uses' => 'PaymentController@stripeOnetime']);
+            $router->get('stripe/setup-intent', ['uses' => 'PaymentController@stripeSetupIntent']);
+            $router->post('stripe/subscribe', ['uses' => 'PaymentController@stripeSubscribe']);
+        });
+
         // Tele-monitoring Routes
         $router->group(['prefix' => 'tele'], function () use ($router) {
             $router->post('save-reading', ['uses' => 'TeleMonitoringController@saveReading']);
@@ -83,8 +90,10 @@ $router->group(['prefix' => 'api'], function () use ($router) {
         $router->group(['prefix' => 'comm'], function () use ($router) {
             //Video Calls
             $router->post('create-vid-meeting', ['uses' => 'CommController@createVidMeeting']);
-            $router->post('make-vid-call', ['uses' => 'CommController@makeVidCall']);
+            $router->get('make-vid-call/{recipient_id}', ['uses' => 'CommController@makeVidCall']);
+            $router->get('vid/notify/{id}/{roomName}', ['uses' => 'CommController@notifyVidRecipient']);//#######
             $router->get('join-vid-call/{roomName}', ['uses' => 'CommController@joinVidMeeting']);
+            $router->get('device/{id}/save', ['uses' => 'CommController@saveDeviceID']);
             // Voice Calls
             $router->get('voice-call/{number}', ['uses' => 'CommController@makeVoiceCall']);//research how to mmake in-app calls
             // Direct Chat

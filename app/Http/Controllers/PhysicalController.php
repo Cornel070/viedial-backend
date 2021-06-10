@@ -341,8 +341,21 @@ class PhysicalController extends Controller
             'workout_id'=> $id
         ]);
 
+        if ( $this->user->goal() ) {
+            $this->user->goal()->calorie_burned_this_week += $video->calorie_burn;
+            $this->user->goal()->save();
+        }
+
         if ($w) {
             return true;
+        }
+
+        if ( $this->user->goal()->calorie_burned_this_week >= $this->user->goal()->weekly_calorie_def ) {
+            //reset weekly burn
+            $this->user->goal()->calorie_burned_this_week = 0;
+            $this->user->goal()->save();
+
+            return response()->json(['res_type'=>'success', 'message'=>'Well done! You have met your weekly calorie goal.'])
         }
 
         return response()->json(['res_type'=>'success', 'message'=>'Workout done']);
@@ -352,6 +365,13 @@ class PhysicalController extends Controller
     {
         foreach ($request->videos as $vid) {
             $this->doneWorkout($vid, true);
+        }
+
+        if ( $this->user->goal()->calorie_burned_this_week >= $this->user->goal()->weekly_calorie_def ) {
+            //reset weekly burn
+            $this->user->goal()->calorie_burned_this_week = 0;
+            $this->user->goal()->save();
+            return response()->json(['res_type'=>'success', 'message'=>'Well done! You have met your weekly calorie goal.'])
         }
 
         return response()->json(['res_type'=>'success', 'message'=>'Workouts done']);
@@ -374,6 +394,11 @@ class PhysicalController extends Controller
                 return false;
             }
             return response()->json(['res_type'=>'not done', 'message'=>'Workout was previously not done']);
+        }
+
+        if ( $this->user->goal() ) {
+            $this->user->goal()->calorie_burned_this_week -= $video->calorie_burn;
+            $this->user->goal()->save();
         }
 
         $tracked->delete();

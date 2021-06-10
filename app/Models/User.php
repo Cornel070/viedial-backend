@@ -11,10 +11,12 @@ use Illuminate\Database\Eloquent\Model;
 use Laravel\Lumen\Auth\Authorizable;
 use App\Traits\Encrypt;
 use Carbon\Carbon;
+use Laravel\Cashier\Billable;
+use App\Models\SingleSub;
 
 class User extends Model implements AuthenticatableContract, AuthorizableContract, JWTSubject
 {
-    use Authenticatable, Authorizable, HasFactory, Encrypt;
+    use Authenticatable, Authorizable, HasFactory, Encrypt, Billable;
 
     /**
      * The attributes that are mass assignable.
@@ -62,11 +64,13 @@ class User extends Model implements AuthenticatableContract, AuthorizableContrac
 
     public function foodItems()
     {
-        return FoodSelection::whereBetween('created_at', 
-                        [
-                            Carbon::now()->startOfWeek(), 
-                            Carbon::now()->endOfWeek()
-                        ])->where('user_id', auth()->user()->id)->get();
+        return $this->hasMany(FoodSelection::class);
+
+        // return FoodSelection::whereBetween('created_at', 
+        //                 [
+        //                     Carbon::now()->startOfWeek(), 
+        //                     Carbon::now()->endOfWeek()
+        //                 ])->where('user_id', auth()->user()->id)->get();
     }
 
     public function breakfast()
@@ -98,5 +102,18 @@ class User extends Model implements AuthenticatableContract, AuthorizableContrac
         return WorkoutTracker::whereDate('created_at', Carbon::today())
         ->where('user_id', auth()->user()->id)
         ->get();
+    }
+
+    public function goal()
+    {
+        return Goal::where('status', 'in progress')->where('user_id', auth()->user()->id)->first();
+    }
+
+    public function activeOnetimeSub()
+    {
+        return SingleSub::where('user_id', auth()->user()->id)
+                         ->whereDate('expires_at', '>=', Carbon::today())
+                         ->where('sub_status', 'active')
+                         ->first();
     }
 }

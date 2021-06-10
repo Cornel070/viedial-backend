@@ -37,13 +37,12 @@ class CommController extends Controller
        $this->user = auth()->user();
 	}
 
-	public function makeVidCall(Request $request, $vendor_id)
+	public function makeVidCall($recipient_id)
     {
-    	$device_token = $request->device_token;
-    	$recipient_name = $request->recipient;
+    	$recipient = User::find($recipient_id);
 
-    	$video_call = $this->createVidMeeting($recipient_name);
-    	return $this->joinVidMeeting($video_call->room_name, $device_token);
+    	$video_call = $this->createVidMeeting($recipient->name);
+    	return $this->joinVidMeeting($video_call->room_name, $recipient->id);
     }
 
 	public function createVidMeeting($recipient_name)
@@ -82,8 +81,17 @@ class CommController extends Controller
     	return Str::random(5);
     }
 
+    public function notifyVidRecipient($id, $roomName)
+    {
+    	$recipient = User::find($id);
+    	$caller = $recipient->name.' - '.$recipient->role;
+    	NotificationController::push($recipient->device_id, $roomName, $caller);
+
+    	return response()->json(['res_type'=>'success']);
+    }
+
     // Join video meeting function
-    public function joinVidMeeting($roomName, $device_token = null)
+    public function joinVidMeeting($roomName, $recipient_id = null)
     {
        $identity = $this->user->name;
 	   $token = new AccessToken($this->sid, $this->key, $this->secret, 3600, $identity);
@@ -97,10 +105,13 @@ class CommController extends Controller
 	   if ($call) {
 		   	// broadcast(new VideoStarted($identity, $call))->toOthers();
 
-	   		if ($device_token) {
-	   			// send the push notification here
-	   			NotificationController::push($device_token, $roomName, $identity);
-	   		}
+		   	if ($recipient_id) {
+		   		return response()->json([
+			   		'res_type'=>'success', 'accessToken'=> $token->toJWT(), 
+			   		'roomName' =>$roomName, 'user_identity'=>$identity, 
+			   		'recipient_id' => $recipient_id
+			   	]);
+		   	}
 
 		   	return response()->json([
 		   		'res_type'=>'success', 'accessToken'=> $token->toJWT(), 
@@ -108,7 +119,7 @@ class CommController extends Controller
 		   	]);
 	   }
 
-	   return response()->json(['res_type'=>'error', 'message'=>'Video callroom not found'],404);
+	   return response()->json(['res_type'=>'error', 'message'=>'Video callroom not found']);
     }
 
     public function makeVoiceCall($number)
@@ -154,5 +165,13 @@ class CommController extends Controller
     	return validator()->make($data, [
             'number' => 'required|string',
         ]);
+    }
+
+    public function saveDeviceID($id)
+    {
+    	$this->user->device_id = $id;
+    	$this->user->save();
+
+    	return response(['res_type'=>'success']);
     }
 }

@@ -24,7 +24,7 @@ class CreateGoalsTable extends Migration
             $table->float('weekly_deficit');
             $table->float('weekly_calorie_def');
             $table->integer('length');
-            $table->integer('weight_burned')->default(0);
+            $table->integer('calorie_burned_this_week')->default(0);
             $table->string('status')->default('in progress');
             $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade')->onUpdate('no action');
             $table->timestamps();

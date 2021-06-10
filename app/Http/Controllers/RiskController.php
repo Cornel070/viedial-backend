@@ -149,7 +149,8 @@ class RiskController extends Controller
                     'assessment_type'=> 'hypertension', 
                     'score'     => $score,
                     'risk_level'=> 'Low',
-                    'implication'=>'Hypertension is called a "silent killer". Most people with hypertension are unaware of the problem because it may have no warning signs or symptoms. For this reason, it is essential that blood pressure is measured regularly.'
+                    'implication'=>'Your risk score is less than 10%. 
+                                    This means you are at low risk of getting cardiovascular disease in the next five years. Whatever your risk score today, remember that it can change depending on what actions you take to lead a healthy life. Viedial Healthcare is here to support you in maintaining these positive lifestyle choices.'
                 ]);
                 break;
 
@@ -159,7 +160,9 @@ class RiskController extends Controller
                     'assessment_type'=> 'hypertension', 
                     'score'     => $score,
                     'risk_level'=> 'Low',
-                    'implication'=>'Hypertension is called a "silent killer". Most people with hypertension are unaware of the problem because it may have no warning signs or symptoms. For this reason, it is essential that blood pressure is measured regularly.'
+                    'implication'=>'Your risk score is less than 10%. 
+                                    This means you are at low risk of getting cardiovascular disease in the next five years. Whatever your risk score today, remember that it can change depending on what actions you take to lead a healthy life. Viedial Healthcare is here to support you in maintaining these positive lifestyle choices.
+                                    '
                 ]);
                 break;
 
@@ -169,7 +172,9 @@ class RiskController extends Controller
                     'assessment_type'=> 'hypertension', 
                     'score'     => $score,
                     'risk_level'=> 'Intermediate',
-                    'implication'=>'Hypertension is called a "silent killer". Most people with hypertension are unaware of the problem because it may have no warning signs or symptoms. For this reason, it is essential that blood pressure is measured regularly.'
+                    'implication'=>'Your Risk score is between 10% – 15%. 
+                                    This means you are at moderate risk of getting cardiovascular disease in the next five years. Whatever your risk score today, remember that it can change depending on what actions you take to lead a healthy life. Viedial Healthcare is here to support you in navigating these positive lifestyle changes.
+                                    '
                 ]);
                 break;
 
@@ -179,7 +184,9 @@ class RiskController extends Controller
                     'assessment_type'=> 'hypertension', 
                     'score'     => $score,
                     'risk_level'=> 'Intermediate',
-                    'implication'=>'Hypertension is called a "silent killer". Most people with hypertension are unaware of the problem because it may have no warning signs or symptoms. For this reason, it is essential that blood pressure is measured regularly.'
+                    'implication'=>'Your Risk score is between 10% – 15%. 
+                                    This means you are at moderate risk of getting cardiovascular disease in the next five years. Whatever your risk score today, remember that it can change depending on what actions you take to lead a healthy life. Viedial Healthcare is here to support you in navigating these positive lifestyle changes.
+                                    '
                 ]);
                 break;
 
@@ -189,7 +196,9 @@ class RiskController extends Controller
                     'assessment_type'=> 'hypertension', 
                     'score'     => $score,
                     'risk_level'=> 'High',
-                    'implication'=>'Hypertension is called a "silent killer". Most people with hypertension are unaware of the problem because it may have no warning signs or symptoms. For this reason, it is essential that blood pressure is measured regularly.'
+                    'implication'=>'Your risk score was calculated to be more than 15%. 
+                                    This means you are at high risk of getting heart, stroke or blood vessel disease (cardiovascular disease) in the next five years. Whatever your risk score today, remember that it can change depending on what actions you take to lead a healthy life. Viedial Healthcare is here to support you in navigating these positive lifestyle changes.
+                                    '
                 ]);
                 break;
 
@@ -199,7 +208,9 @@ class RiskController extends Controller
                     'assessment_type'=> 'hypertension',
                     'score'     => $score,
                     'risk_level'=> 'High',
-                    'implication'=>'Hypertension is called a "silent killer". Most people with hypertension are unaware of the problem because it may have no warning signs or symptoms. For this reason, it is essential that blood pressure is measured regularly.'
+                    'implication'=>'Your risk score was calculated to be more than 15%. 
+                                    This means you are at high risk of getting heart, stroke or blood vessel disease (cardiovascular disease) in the next five years. Whatever your risk score today, remember that it can change depending on what actions you take to lead a healthy life. Viedial Healthcare is here to support you in navigating these positive lifestyle changes.
+                                    '
                 ]);
                 break;
             
@@ -209,7 +220,9 @@ class RiskController extends Controller
                     'assessment_type'=> 'hypertension', 
                     'score'     => $score,
                     'risk_level'=> 'Low',
-                    'implication'=>'Hypertension is called a "silent killer". Most people with hypertension are unaware of the problem because it may have no warning signs or symptoms. For this reason, it is essential that blood pressure is measured regularly.'
+                    'implication'=>'Your risk score is less than 10%. 
+                                    This means you are at low risk of getting cardiovascular disease in the next five years. Whatever your risk score today, remember that it can change depending on what actions you take to lead a healthy life. Viedial Healthcare is here to support you in maintaining these positive lifestyle choices.
+                                    '
                 ]);
                 break;
         }
@@ -224,7 +237,7 @@ class RiskController extends Controller
                 'assessment_type'=> 'diabetes', 
                 'score'     => $score,
                 'risk_level'=> 'Low',
-                'implication'=>"There are three major types of the disease: type 1, type 2, and gestational diabetes. With all three, your body can't make or use insulin. One of every four people with diabetes doesn't know they have it."
+                'implication'=>"Your risk score is Low (0-6). 1 in 100 people with your risk will get Type 2 diabetes in the next 10 years. It is great that you are at low risk. Viedial Healthcare is here to support you in managing your controllable risk factors, so you can keep your risk low for as long as possible."
             ]);
             break;
 
@@ -234,7 +247,7 @@ class RiskController extends Controller
                 'assessment_type'=> 'diabetes', 
                 'score'     => $score,
                 'risk_level'=> 'Slightly elevated',
-                'implication'=>"There are three major types of the disease: type 1, type 2, and gestational diabetes. With all three, your body can't make or use insulin. One of every four people with diabetes doesn't know they have it."
+                'implication'=>"Your risk score is Slightly Elevated (7 – 15). 1 in 35 people with your risk will get Type 2 diabetes in the next 10 years. Not all factors are controllable (age, genes). However, if your risk is partly due to your lifestyle, a few small changes can make a big difference. Viedial Healthcare is here to support you in navigating these positive lifestyle changes."
             ]);
             break;
 
@@ -244,7 +257,7 @@ class RiskController extends Controller
                 'assessment_type'=> 'diabetes', 
                 'score'     => $score,
                 'risk_level'=> 'Moderate',
-                'implication'=>"There are three major types of the disease: type 1, type 2, and gestational diabetes. With all three, your body can't make or use insulin. One of every four people with diabetes doesn't know they have it."
+                'implication'=>"Your risk score is Moderate (7 – 15). 1 in 35 people with your risk will get Type 2 diabetes in the next 10 years. Not all factors are controllable (age, genes). However, if your risk is partly due to your lifestyle, a few small changes can make a big difference. Viedial Healthcare is here to support you in navigating these positive lifestyle changes."
             ]);
             break;
 
@@ -254,7 +267,7 @@ class RiskController extends Controller
                 'assessment_type'=> 'diabetes', 
                 'score'     => $score,
                 'risk_level'=> 'High',
-                'implication'=>"There are three major types of the disease: type 1, type 2, and gestational diabetes. With all three, your body can't make or use insulin. One of every four people with diabetes doesn't know they have it."
+                'implication'=>"Your risk score is High (16 – 24). 1 in 10 people with your risk will get Type 2 diabetes in the next 10 years. It is important to make lifestyle changes that will improve the risk factors you can control like weight. Viedial Healthcare is here to support you in navigating these positive lifestyle changes."
             ]);
             break;
 
@@ -264,7 +277,7 @@ class RiskController extends Controller
                 'assessment_type'=> 'diabetes', 
                 'score'     => $score,
                 'risk_level'=> 'Very High',
-                'implication'=>"There are three major types of the disease: type 1, type 2, and gestational diabetes. With all three, your body can't make or use insulin.One of every four people with diabetes doesn't know they have it."
+                'implication'=>"Your risk score is Very High. (25 – 47). 1 in 4 people with your risk will get Type 2 diabetes in the next 10 years. It is important to make lifestyle changes that will improve the risk factors you can control like weight. Viedial Healthcare is here to support you in navigating these positive lifestyle changes."
             ]);
             break;
             
@@ -274,7 +287,7 @@ class RiskController extends Controller
                 'assessment_type'=> 'diabetes', 
                 'score'     => $score,
                 'risk_level'=> 'Low',
-                'implication'=>"There are three major types of the disease: type 1, type 2, and gestational diabetes. With all three, your body can't make or use insulin. One of every four people with diabetes doesn't know they have it."
+                'implication'=>"Your risk score is Low (0-6). 1 in 100 people with your risk will get Type 2 diabetes in the next 10 years. It is great that you are at low risk. Viedial Healthcare is here to support you in managing your controllable risk factors, so you can keep your risk low for as long as possible."
             ]);
             break;
         }

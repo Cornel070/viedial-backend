@@ -91,6 +91,7 @@ $app->middleware([
 
 $app->routeMiddleware([
     'auth' => App\Http\Middleware\Authenticate::class,
+    'check.sub' => App\Http\Middleware\CheckSub::class,
 ]);
 
 /*

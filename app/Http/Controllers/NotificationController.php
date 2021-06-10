@@ -150,7 +150,7 @@ class NotificationController extends Controller
         return response()->json(['res_type'=>'success', 'summaries'=>$summary]);
     }
 
-    public static function push($device_token, $roomName, $caller)
+    public static function push($device_id, $roomName, $caller)
     {
         $optionBuilder = new OptionsBuilder();
         $optionBuilder->setTimeToLive(50);
@@ -166,9 +166,7 @@ class NotificationController extends Controller
         $notification = $notificationBuilder->build();
         $data = $dataBuilder->build();
 
-        $token = $device_token;
-
-        $downstreamResponse = FCM::sendTo($token, $option, $notification, $data);
+        $downstreamResponse = FCM::sendTo($device_id, $option, $notification, $data);
 
         $downstreamResponse->numberSuccess();
         $downstreamResponse->numberFailure();
