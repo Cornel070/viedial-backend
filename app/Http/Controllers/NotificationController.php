@@ -152,38 +152,42 @@ class NotificationController extends Controller
 
     public static function push($device_id, $roomName, $caller)
     {
-        $optionBuilder = new OptionsBuilder();
-        $optionBuilder->setTimeToLive(50);
+        try {
+            $optionBuilder = new OptionsBuilder();
+            $optionBuilder->setTimeToLive(50);
 
-        $notificationBuilder = new PayloadNotificationBuilder($caller);
-        $notificationBuilder->setBody('Viedial video call')
+            $notificationBuilder = new PayloadNotificationBuilder($caller);
+            $notificationBuilder->setBody('Viedial video call')
                             ->setSound('default');
 
-        $dataBuilder = new PayloadDataBuilder();
-        $dataBuilder->addData(['roomName' => $roomName]);
+            $dataBuilder = new PayloadDataBuilder();
+            $dataBuilder->addData(['roomName' => $roomName]);
 
-        $option = $optionBuilder->build();
-        $notification = $notificationBuilder->build();
-        $data = $dataBuilder->build();
+            $option = $optionBuilder->build();
+            $notification = $notificationBuilder->build();
+            $data = $dataBuilder->build();
 
-        $downstreamResponse = FCM::sendTo($device_id, $option, $notification, $data);
+            $downstreamResponse = FCM::sendTo($device_id, $option, $notification, $data);
 
-        $downstreamResponse->numberSuccess();
-        $downstreamResponse->numberFailure();
-        $downstreamResponse->numberModification();
+            $downstreamResponse->numberSuccess();
+            $downstreamResponse->numberFailure();
+            $downstreamResponse->numberModification();
 
-        // return Array - you must remove all this tokens in your database
-        $downstreamResponse->tokensToDelete();
+            // return Array - you must remove all this tokens in your database
+            $downstreamResponse->tokensToDelete();
 
-        // return Array (key : oldToken, value : new token - you must change the token in your database)
-        $downstreamResponse->tokensToModify();
+            // return Array (key : oldToken, value : new token - you must change the token in your database)
+            $downstreamResponse->tokensToModify();
 
-        // return Array - you should try to resend the message to the tokens in the array
-        $downstreamResponse->tokensToRetry();
+            // return Array - you should try to resend the message to the tokens in the array
+            $downstreamResponse->tokensToRetry();
 
-        // return Array (key:token, value:error) - in production you should remove from your database the tokens
-        $downstreamResponse->tokensWithError();
+            // return Array (key:token, value:error) - in production you should remove from your database the tokens
+            $downstreamResponse->tokensWithError();
 
-        return true;
+            return true;
+        } catch (\LaravelFCM\Response\Exceptions\InvalidRequestException $e) {
+            return false;
+        }
     }
 }

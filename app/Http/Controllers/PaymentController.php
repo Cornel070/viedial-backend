@@ -33,7 +33,7 @@ class PaymentController extends Controller
             $this->user->sub_type = 'one-time';
             $this->user->save();
 
-            return response()->json(['res_type'=>'success', 'message'=>'Payment successfull']);
+            return response()->json(['res_type'=>'success', 'message'=>'Payment successful']);
         } catch (IncompletePayment $e) {
             return response()->json(['res_type'=>'failed_payment', 'message'=>'Unable to complete payment']);
         }

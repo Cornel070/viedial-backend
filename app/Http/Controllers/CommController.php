@@ -85,9 +85,11 @@ class CommController extends Controller
     {
     	$recipient = User::find($id);
     	$caller = $recipient->name.' - '.$recipient->role;
-    	NotificationController::push($recipient->device_id, $roomName, $caller);
-
-    	return response()->json(['res_type'=>'success']);
+    	$notified = NotificationController::push($recipient->device_id, $roomName, $caller);
+    	if ($notified) {
+    		return response()->json(['res_type'=>'success']);
+    	}
+    	return response()->json(['res_type'=>'unavailable', 'message'=>'Recipient unavailable']);
     }
 
     // Join video meeting function
@@ -167,9 +169,9 @@ class CommController extends Controller
         ]);
     }
 
-    public function saveDeviceID($id)
+    public function saveDeviceID(Request $request)
     {
-    	$this->user->device_id = $id;
+    	$this->user->device_id = $request->device_token;
     	$this->user->save();
 
     	return response(['res_type'=>'success']);

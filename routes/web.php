@@ -93,7 +93,7 @@ $router->group(['prefix' => 'api'], function () use ($router) {
             $router->get('make-vid-call/{recipient_id}', ['uses' => 'CommController@makeVidCall']);
             $router->get('vid/notify/{id}/{roomName}', ['uses' => 'CommController@notifyVidRecipient']);//#######
             $router->get('join-vid-call/{roomName}', ['uses' => 'CommController@joinVidMeeting']);
-            $router->get('device/{id}/save', ['uses' => 'CommController@saveDeviceID']);
+            $router->post('device-token', ['uses' => 'CommController@saveDeviceID']);
             // Voice Calls
             $router->get('voice-call/{number}', ['uses' => 'CommController@makeVoiceCall']);//research how to mmake in-app calls
             // Direct Chat
