@@ -7,6 +7,7 @@ use App\Models\Chat;
 use App\Events\MessageSent;
 use App\Models\User;
 use App\Models\Message;
+use App\Http\Controllers\NotificationController;
 
 class ChatController extends Controller
 {
@@ -30,18 +31,25 @@ class ChatController extends Controller
         $to_user = User::find($request->to_id);
 
         if (!$to_user) {
-            return response()->json(['res_type'=>'not found', 'message'=>'Recipient user does not exist'],404);
+            return response()->json(['res_type'=>'not found', 'message'=>'Recipient user does not exist']);
         }
 
         if (!$chat_id) {
-            $chat = New Chat;
-            $chat->user1_id = $this->user->id;
-            $chat->user1_name = $this->user->name;
-            $chat->user2_id = $to_user->id;
-            $chat->user2_name = $to_user->name;
-            $chat->save();
+            $chat = Chat::where('user1_id', $this->user->id)->orWhere('user2_id', $this->user->id)
+                         ->where('user1_id', $request->to_id)->orWhere('user2_id', $request->to_id)
+                         ->first();
+            if ($chat) {
+                $chat_id = $chat->id;
+            }else{
+                $chat = New Chat;
+                $chat->user1_id = $this->user->id;
+                $chat->user1_name = $this->user->name;
+                $chat->user2_id = $to_user->id;
+                $chat->user2_name = $to_user->name;
+                $chat->save();
 
-            $chat_id  = $chat->id;
+                $chat_id  = $chat->id;
+            }
         }
 
         $message = new Message;
@@ -53,7 +61,11 @@ class ChatController extends Controller
         $message->chat_id = $chat_id;
         $message->save();
 
-        broadcast(new MessageSent($message->from_name, $message))->toOthers();
+        $device_id = $to_user->device_id;
+        $from = $message->from_name;
+        $body = $message->message_text;
+        NotificationController::msgNotification($device_id, $from, $body);
+        // broadcast(new MessageSent($message->from_name, $message))->toOthers();
 
         return response()->json(['res_type'=>'success', 'message'=>$message]);
     }
@@ -118,19 +130,38 @@ class ChatController extends Controller
         $chat = Chat::find($id);
 
         if (!$chat) {
-            return response()->json(['res_type'=>'not found', 'message'=>'Chat does not exist'],404);
+            return response()->json(['res_type'=>'not found', 'message'=>'Chat does not exist']);
         }
 
         if (!$chat->messages) {
             return response()->json(['res_type'=>'no content', 'message'=>'No messages yet']);
         }
 
-        return response()->json(['res_type'=>'success', 'messages'=>$chat->messages]);
+        $msgArr = [];
+        foreach ($chat->messages as $msg) {
+            $status = $msg->from_id == $this->user->id ? 'read' : $msg->status;
+            $data = [
+                'id'        => $msg->id,
+                'chat_id'   => $msg->chat_id,
+                'from_id'   => $msg->from_id,
+                'from_name' => $msg->from_name,
+                'to_id'     => $msg->to_id,
+                'to_name'   => $msg->to_name,
+                'message_text'=> $msg->message_text,
+                'status'      => $status
+            ];
+            array_push($msgArr, $data);
+        }
+
+        return response()->json(['res_type'=>'success', 'messages'=>$msgArr]);
     }
 
     public function allDoctors()
     {
-        $doctors = User::where('role', '!=', 'Client')->select('id','name','gender','role')->get();
+        $doctors = User::where('role', '!=', 'Client')
+                    ->where('id', '!=', $this->user->id)
+                    ->select('id','name','gender','role')
+                    ->get();
 
         if ($doctors->isEmpty()) {
             return response()->json(['res_type'=>'no content', 'message'=>'No health personels registered yet.']);
@@ -155,7 +186,7 @@ class ChatController extends Controller
         $chat = Chat::find($id);
 
         if (!$chat) {
-            return response()->json(['res_type'=>'not found', 'message'=>'Chat does not exist'],404);
+            return response()->json(['res_type'=>'not found', 'message'=>'Chat does not exist']);
         }
 
         if ($chat->messages->isEmpty()) {
@@ -177,7 +208,7 @@ class ChatController extends Controller
         $msg = Message::find($id);
 
         if (!$msg) {
-            return response()->json(['res_type'=>'not found', 'message'=>'Message does not exist'],404);
+            return response()->json(['res_type'=>'not found', 'message'=>'Message does not exist']);
         }
 
         if ($msg->to_id == $this->user->id) {
@@ -197,7 +228,7 @@ class ChatController extends Controller
         $msg = Message::find($id);
 
         if (!$msg) {
-            return response()->json(['res_type'=>'not found', 'message'=>'Message does not exist'],404);
+            return response()->json(['res_type'=>'not found', 'message'=>'Message does not exist']);
         }
 
         $msg->delete();
@@ -215,7 +246,7 @@ class ChatController extends Controller
         $chat = Chat::find($id);
 
         if (!$chat) {
-            return response()->json(['res_type'=>'not found', 'message'=>'Chat does not exist'],404);
+            return response()->json(['res_type'=>'not found', 'message'=>'Chat does not exist']);
         }
 
         $chat->delete();

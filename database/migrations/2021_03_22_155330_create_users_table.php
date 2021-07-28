@@ -24,7 +24,7 @@ class CreateUsersTable extends Migration
             $table->string('program')->nullable();
             $table->string('gender');
             $table->string('acct_key')->nullable();
-            $table->string('status')->default("false");//Subscription status
+            $table->string('status')->default("inactive");//Subscription status
             $table->string('role')->default('Client');
             $table->string('device_id');
             $table->string('sub_type')->nullable();

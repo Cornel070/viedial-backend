@@ -12,6 +12,7 @@ use LaravelFCM\Message\OptionsBuilder;
 use LaravelFCM\Message\PayloadDataBuilder;
 use LaravelFCM\Message\PayloadNotificationBuilder;
 use FCM;
+use App\Models\User;
 
 class NotificationController extends Controller
 {
@@ -150,44 +151,119 @@ class NotificationController extends Controller
         return response()->json(['res_type'=>'success', 'summaries'=>$summary]);
     }
 
-    public static function push($device_id, $roomName, $caller)
+    public static function msgNotification($device_id, $from, $body)
     {
-        try {
-            $optionBuilder = new OptionsBuilder();
-            $optionBuilder->setTimeToLive(50);
-
-            $notificationBuilder = new PayloadNotificationBuilder($caller);
-            $notificationBuilder->setBody('Viedial video call')
-                            ->setSound('default');
-
-            $dataBuilder = new PayloadDataBuilder();
-            $dataBuilder->addData(['roomName' => $roomName]);
-
-            $option = $optionBuilder->build();
-            $notification = $notificationBuilder->build();
-            $data = $dataBuilder->build();
-
-            $downstreamResponse = FCM::sendTo($device_id, $option, $notification, $data);
-
-            $downstreamResponse->numberSuccess();
-            $downstreamResponse->numberFailure();
-            $downstreamResponse->numberModification();
-
-            // return Array - you must remove all this tokens in your database
-            $downstreamResponse->tokensToDelete();
-
-            // return Array (key : oldToken, value : new token - you must change the token in your database)
-            $downstreamResponse->tokensToModify();
-
-            // return Array - you should try to resend the message to the tokens in the array
-            $downstreamResponse->tokensToRetry();
-
-            // return Array (key:token, value:error) - in production you should remove from your database the tokens
-            $downstreamResponse->tokensWithError();
-
-            return true;
-        } catch (\LaravelFCM\Response\Exceptions\InvalidRequestException $e) {
-            return false;
+        $accesstoken = env('FCM_SERVER_KEY');
+        $title = 'Viedial notification';
+        $type = 'chat';
+        $URL = 'https://fcm.googleapis.com/fcm/send';
+     
+     
+            $post_data = '{
+                "to" : "' . $device_id . '",
+                "data" : {
+                  "body" : "",
+                  "title" : "' . $title . '",
+                  "notification_type" : "' . $type . '",
+                  "message" : "' . $body . '",
+                },
+                "notification" : {
+                     "body" : "' . $body . '",
+                     "title" : "' . $title . '",
+                      "type" : "' . $type . '",
+                     "message" : "' . $body . '",
+                    "icon" : "new",
+                    "sound" : "default"
+                    },
+     
+              }';
+            // print_r($post_data);die;
+     
+        $crl = curl_init();
+     
+        $headr = array();
+        $headr[] = 'Content-type: application/json';
+        $headr[] = 'Authorization:key=' . $accesstoken;
+        curl_setopt($crl, CURLOPT_SSL_VERIFYPEER, false);
+     
+        curl_setopt($crl, CURLOPT_URL, $URL);
+        curl_setopt($crl, CURLOPT_HTTPHEADER, $headr);
+     
+        curl_setopt($crl, CURLOPT_POST, true);
+        curl_setopt($crl, CURLOPT_POSTFIELDS, $post_data);
+        curl_setopt($crl, CURLOPT_RETURNTRANSFER, true);
+     
+        $rest = curl_exec($crl);
+        
+        if ($rest === false) {
+            // throw new Exception('Curl error: ' . curl_error($crl));
+            //print_r('Curl error: ' . curl_error($crl));
+            $result_noti = false;
+        } else {
+     
+            $result_noti = true;
         }
+     
+        //curl_close($crl);
+        //print_r($result_noti);die;
+        return $result_noti;
+    }
+
+    public static function vidNotification($device_id, $roomName, $from, $call_type)
+    {
+        $accesstoken = env('FCM_SERVER_KEY');
+        $title = 'Video call from '.$from.' on Viedial';
+        $type = $call_type;
+        $URL = 'https://fcm.googleapis.com/fcm/send';
+     
+            $post_data = '{
+                "to" : "' . $device_id . '",
+                "data" : {
+                  "body" : "",
+                  "title" : "' . $title . '",
+                  "notification_type" : "' . $type . '",
+                  "roomName" : "' . $roomName . '",
+                  "message" : "' . $roomName . '",
+                },
+                "notification" : {
+                     "body" : "' . $roomName . '",
+                     "title" : "' . $title . '",
+                      "type" : "' . $type . '",
+                     "message" : "' . $roomName . '",
+                    "icon" : "new",
+                    "sound" : "default"
+                    },
+     
+              }';
+            // print_r($post_data);die;
+     
+        $crl = curl_init();
+     
+        $headr = array();
+        $headr[] = 'Content-type: application/json';
+        $headr[] = 'Authorization:key=' . $accesstoken;
+        curl_setopt($crl, CURLOPT_SSL_VERIFYPEER, false);
+     
+        curl_setopt($crl, CURLOPT_URL, $URL);
+        curl_setopt($crl, CURLOPT_HTTPHEADER, $headr);
+     
+        curl_setopt($crl, CURLOPT_POST, true);
+        curl_setopt($crl, CURLOPT_POSTFIELDS, $post_data);
+        curl_setopt($crl, CURLOPT_RETURNTRANSFER, true);
+     
+        $rest = curl_exec($crl);
+        
+        if ($rest === false) {
+            // throw new Exception('Curl error: ' . curl_error($crl));
+            //print_r('Curl error: ' . curl_error($crl));
+            $result_noti = false;
+        } else {
+     
+            $result_noti = true;
+        }
+     
+        //curl_close($crl);
+        //print_r($result_noti);die;
+        return $result_noti;
     }
 }

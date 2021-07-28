@@ -68,6 +68,7 @@ $app->singleton(
 $app->configure('app');
 $app->configure('auth');
 $app->configure('services');
+$app->configure('cors');
 // Mail Config
 $app->configure('mail');
 $app->alias('mailer', Illuminate\Mail\Mailer::class);
@@ -86,7 +87,8 @@ $app->alias('mailer', Illuminate\Contracts\Mail\MailQueue::class);
 */
 
 $app->middleware([
-    App\Http\Middleware\Cors::class
+    // App\Http\Middleware\Cors::class
+    Fruitcake\Cors\HandleCors::class,
 ]);
 
 $app->routeMiddleware([
@@ -112,6 +114,7 @@ $app->register(App\Providers\EventServiceProvider::class);
 $app->register(Flipbox\LumenGenerator\LumenGeneratorServiceProvider::class);
 $app->register(Illuminate\Mail\MailServiceProvider::class);
 $app->register(LaravelFCM\FCMServiceProvider::class);
+$app->register(Fruitcake\Cors\CorsServiceProvider::class);
 
 /*
 |--------------------------------------------------------------------------

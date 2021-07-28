@@ -3,8 +3,8 @@
 namespace App\Http\Controllers;
 
 use Laravel\Cashier\Exceptions\IncompletePayment;
+use App\Models\VSubscription;
 use Illuminate\Http\Request;
-use App\Models\SingleSub;
 use Carbon\Carbon;
 
 class PaymentController extends Controller
@@ -16,27 +16,37 @@ class PaymentController extends Controller
         $this->user = auth()->user();
     }
 
-    public function stripeOnetime(Request $request)
+    public function stripeOneTime(Request $request)
     {
         $price = $this->getProgramPrice();
 
         try {
             $this->user->charge($price, $request->paymentMethodId);
 
-            $single_sub = new SingleSub;
-            $single_sub->user_id = $this->user->id;
-            $single_sub->sub_status = 'active';
-            $single_sub->expires_at = Carbon::now()->addMonth(1);
-            $single_sub->save();
-
-            //set user sub type to one-time
-            $this->user->sub_type = 'one-time';
-            $this->user->save();
+            $this->saveSub('one-time', $request->duration);
 
             return response()->json(['res_type'=>'success', 'message'=>'Payment successful']);
         } catch (IncompletePayment $e) {
             return response()->json(['res_type'=>'failed_payment', 'message'=>'Unable to complete payment']);
         }
+    }
+
+    public function saveSub($type, $duration = 1)
+    {
+        $sub = new VSubscription;
+        $sub->user_id = $this->user->id;
+        $sub->sub_status = 'active';
+        $sub->type = $type;
+        $table->duration = $duration;
+        $sub->expires_at = Carbon::now()->addMonths($duration);
+        $sub->save();
+
+        //set user sub type to one-time
+        $this->user->sub_type = $type;
+        $this->user->status   = 'active';
+        $this->user->save();
+
+        return true;
     }
 
     public function stripeSetupIntent()
@@ -74,5 +84,15 @@ class PaymentController extends Controller
         }
 
         return $price;
+    }
+
+    public function updatPaidUser(Request $request)
+    {
+        if ($request->type == 'single') {
+            $this->saveSub($request->type, $request->duration);
+            return response()->json(['res_type'=>'success', 'message'=>'User account updated']);
+        }
+        $this->saveSub($request->type);
+        return response()->json(['res_type'=>'success', 'message'=>'User account updated']);
     }
 }

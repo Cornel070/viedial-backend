@@ -34,9 +34,11 @@ class AuthController extends Controller
         $usersArr = [];
         foreach (User::all() as $user) {
             $data = [
-                'name'=>$user->name,
-                'password'=>$user->password,
-                'acct_key'=>$user->acct_key
+                'id'        => $user->id,
+                'name'      => $user->name,
+                'password'  => $user->password,
+                'acct_key'  => $user->acct_key,
+                'role'      => $user->role
             ];
             array_push($usersArr, $data);
         }
@@ -70,6 +72,7 @@ class AuthController extends Controller
             'gender'    => $request->gender,
             'annon_name'=> $annon_name,
             'program'   => $request->program,
+            'status'    => 'inactive'
         ];
 
         $user = User::create($data);

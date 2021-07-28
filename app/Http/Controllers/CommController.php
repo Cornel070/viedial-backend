@@ -84,8 +84,12 @@ class CommController extends Controller
     public function notifyVidRecipient($id, $roomName)
     {
     	$recipient = User::find($id);
-    	$caller = $recipient->name.' - '.$recipient->role;
-    	$notified = NotificationController::push($recipient->device_id, $roomName, $caller);
+    	$from = $recipient->name.' - '.$recipient->role;
+    	$body = $roomName;
+    	$call_type = request()->call_type;
+    	$notified = NotificationController::vidNotification(
+    		$recipient->device_id, $roomName, $from, $call_type
+    	);
     	if ($notified) {
     		return response()->json(['res_type'=>'success']);
     	}
@@ -121,7 +125,7 @@ class CommController extends Controller
 		   	]);
 	   }
 
-	   return response()->json(['res_type'=>'error', 'message'=>'Video callroom not found']);
+	   return response()->json(['res_type'=>'error', 'message'=>'Video call room not found']);
     }
 
     public function makeVoiceCall($number)

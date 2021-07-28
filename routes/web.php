@@ -35,6 +35,7 @@ $router->group(['prefix' => 'api'], function () use ($router) {
             //Food types and Items
             $router->post('create-food', ['uses' => 'MealController@createFood']);
             $router->post('add', ['uses' => 'MealController@addMeal']);
+            $router->get('food-types', ['uses' => 'MealController@getFoodTypes']);
         });
     });
     /*
@@ -64,9 +65,13 @@ $router->group(['prefix' => 'api'], function () use ($router) {
 
         // Payment Routes
         $router->group(['prefix' => 'pay'], function () use ($router) {
-            $router->post('stripe/onetime', ['uses' => 'PaymentController@stripeOnetime']);
+            //Stripe
+            $router->post('stripe/onetime', ['uses' => 'PaymentController@stripeOneTime']);
             $router->get('stripe/setup-intent', ['uses' => 'PaymentController@stripeSetupIntent']);
             $router->post('stripe/subscribe', ['uses' => 'PaymentController@stripeSubscribe']);
+
+            //payment confirmation
+            $router->post('user-paid', ['uses' => 'PaymentController@updatPaidUser']);
         });
 
         // Tele-monitoring Routes
@@ -91,16 +96,17 @@ $router->group(['prefix' => 'api'], function () use ($router) {
             //Video Calls
             $router->post('create-vid-meeting', ['uses' => 'CommController@createVidMeeting']);
             $router->get('make-vid-call/{recipient_id}', ['uses' => 'CommController@makeVidCall']);
-            $router->get('vid/notify/{id}/{roomName}', ['uses' => 'CommController@notifyVidRecipient']);//#######
+            $router->get('vid/notify/{id}/{roomName}', ['uses' => 'CommController@notifyVidRecipient']);
             $router->get('join-vid-call/{roomName}', ['uses' => 'CommController@joinVidMeeting']);
             $router->post('device-token', ['uses' => 'CommController@saveDeviceID']);
             // Voice Calls
-            $router->get('voice-call/{number}', ['uses' => 'CommController@makeVoiceCall']);//research how to mmake in-app calls
+            $router->get('voice-call/{number}', ['uses' => 'CommController@makeVoiceCall']);//research how to make in-app calls
+            
             // Direct Chat
             $router->post('send-chat', ['uses' => 'ChatController@sendDirectChat']);
             $router->get('all-chats', ['uses' => 'ChatController@viewAllChats']);
             $router->get('chat/{id}/messages', ['uses' => 'ChatController@allChatMessages']);
-            $router->get('recipients', ['uses' => 'ChatController@allDoctors']);//###########
+            $router->get('recipients', ['uses' => 'ChatController@allDoctors']);
             $router->get('check-chat/{user_id}', ['uses' => 'ChatController@checkPrevChat']);//###########
             $router->get('chat/{id}/read', ['uses' => 'ChatController@markChatAsRead']);//###########
             $router->get('msg/{id}/read', ['uses' => 'ChatController@markMsgAsRead']);//###########
