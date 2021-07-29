@@ -65,11 +65,10 @@ $router->group(['prefix' => 'api'], function () use ($router) {
 
         // Payment Routes
         $router->group(['prefix' => 'pay'], function () use ($router) {
+            //price for user's plan
+            $router->get('user_price', ['uses' => 'PaymentController@getUserPlanPrice']);
             //Stripe
             $router->post('stripe/onetime', ['uses' => 'PaymentController@stripeOneTime']);
-            $router->get('stripe/setup-intent', ['uses' => 'PaymentController@stripeSetupIntent']);
-            $router->post('stripe/subscribe', ['uses' => 'PaymentController@stripeSubscribe']);
-
             //payment confirmation
             $router->post('user-paid', ['uses' => 'PaymentController@updatPaidUser']);
         });

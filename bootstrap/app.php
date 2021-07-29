@@ -115,6 +115,7 @@ $app->register(Flipbox\LumenGenerator\LumenGeneratorServiceProvider::class);
 $app->register(Illuminate\Mail\MailServiceProvider::class);
 $app->register(LaravelFCM\FCMServiceProvider::class);
 $app->register(Fruitcake\Cors\CorsServiceProvider::class);
+$app->register(Stripe\Laravel\StripeServiceProvider::class);
 
 /*
 |--------------------------------------------------------------------------

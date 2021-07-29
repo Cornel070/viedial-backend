@@ -6,6 +6,7 @@ use Laravel\Cashier\Exceptions\IncompletePayment;
 use App\Models\VSubscription;
 use Illuminate\Http\Request;
 use Carbon\Carbon;
+use App\Models\User;
 
 class PaymentController extends Controller
 {
@@ -18,25 +19,42 @@ class PaymentController extends Controller
 
     public function stripeOneTime(Request $request)
     {
-        $price = $this->getProgramPrice();
-
+        $price = $request->price * $request->duration; //price for the users duration
         try {
-            $this->user->charge($price, $request->paymentMethodId);
+            \Stripe\Stripe::setApiKey(env('STRIPE_SECRET'));
+            \Stripe\Charge::create ([
+                    "amount" => $price * 100,
+                    "currency" => "usd",
+                    "source" => $request->stripeToken,
+                    "description" => "Payment for ".$this->user->program." plan" 
+            ]);
 
-            $this->saveSub('one-time', $request->duration);
-
+            $this->saveSub($request->duration);
             return response()->json(['res_type'=>'success', 'message'=>'Payment successful']);
-        } catch (IncompletePayment $e) {
-            return response()->json(['res_type'=>'failed_payment', 'message'=>'Unable to complete payment']);
+
+        } catch(\Stripe\Exception\CardException $e) {
+            return response()->json('res_type'=>'failed', 'message'=>'Card declined');
+        } catch (\Stripe\Exception\RateLimitException $e) {
+            return response()->json('res_type'=>'failed', 'message'=>'Too many attempts in a short time');
+        } catch (\Stripe\Exception\InvalidRequestException $e) {
+            return response()->json('res_type'=>'failed', 'message'=>'Something went wrong');
+        } catch (\Stripe\Exception\AuthenticationException $e) {
+            return response()->json('res_type'=>'failed', 'message'=>'Something went wrong');
+        } catch (\Stripe\Exception\ApiConnectionException $e) {
+            return response()->json('res_type'=>'failed', 'message'=>'Connection to stripe failed');
+        } catch (\Stripe\Exception\ApiErrorException $e) {
+            return response()->json('res_type'=>'failed', 'message'=>'Something went wrong');
+        } catch (Exception $e) {
+            return response()->json('res_type'=>'failed', 'message'=>'Something went wrong');
         }
     }
 
-    public function saveSub($type, $duration = 1)
+    public function saveSub($duration = 1)
     {
         $sub = new VSubscription;
         $sub->user_id = $this->user->id;
         $sub->sub_status = 'active';
-        $sub->type = $type;
+        $sub->type = $this->user->program;
         $table->duration = $duration;
         $sub->expires_at = Carbon::now()->addMonths($duration);
         $sub->save();
@@ -47,30 +65,6 @@ class PaymentController extends Controller
         $this->user->save();
 
         return true;
-    }
-
-    public function stripeSetupIntent()
-    {
-        $intent = $this->user->createSetupIntent();
-
-        return response()->json(['res_type'=>'success', 'intent'=>$intent]);
-    }
-
-    public function stripeSubscribe(Request $request)
-    {
-        try {
-            $price_monthly = $this->getProgramPrice();
-            $this->user->newSubscription($this->user->program, $price_monthly)
-                       ->create($request->paymentMethodId);
-
-            //set user sub type to one-time
-            $this->user->sub_type = 'subscription';
-            $this->user->save();
-
-            return response()->json(['res_type'=>'success', 'message'=>'Subscribed']);
-        } catch (IncompletePayment $e) {
-            return response()->json(['res_type'=>'failed_payment', 'message'=>'Unable to complete payment']);
-        }
     }
 
     public function getProgramPrice()
@@ -88,11 +82,13 @@ class PaymentController extends Controller
 
     public function updatPaidUser(Request $request)
     {
-        if ($request->type == 'single') {
-            $this->saveSub($request->type, $request->duration);
-            return response()->json(['res_type'=>'success', 'message'=>'User account updated']);
-        }
-        $this->saveSub($request->type);
+        $this->saveSub($request->duration);
         return response()->json(['res_type'=>'success', 'message'=>'User account updated']);
+    }
+
+    public function getUserPlanPrice()
+    {
+        $price = getProgramPrice();
+        return response()->json(['res_type'=>'success', 'price'=> $price]);
     }
 }
