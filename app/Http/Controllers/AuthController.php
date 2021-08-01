@@ -79,7 +79,7 @@ class AuthController extends Controller
 
         $this->verifyEmail($user);
 
-        return response()->json(['res_type'=> 'success', 'name'=>$user->name], 200);
+        return response()->json(['res_type'=> 'success', 'name'=>$user->name, 'id'=>$user->id], 200);
     }
 
     private function emailIsNotUnique($email)

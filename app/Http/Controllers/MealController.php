@@ -116,6 +116,7 @@ class MealController extends Controller
 
         foreach ($food_types as $food) {
             $data = [
+                'id'        => $food->id,
                 'title'     => $food->title,
                 'food_items'=> $food->items
             ];
@@ -124,6 +125,21 @@ class MealController extends Controller
         }
 
         return response()->json(['res_type'=>'success', 'food_types'=>$foodArr]);
+    }
+
+    public function getSingleFood($id)
+    {
+        $food_type = FoodType::find($id);
+        if (!$food_type) {
+            return response()->json(['res_type'=>'not found', 'message'=>'Food type not found']);
+        }
+
+        return response()->json([
+            'res_type'   => 'found', 
+            'food_id'    => $food_type->id,
+            'food_title' => $food_type->title,
+            'food_items' => $food_type->items
+        ]);
     }
 
     public function createFoodItemSelection(Request $request)

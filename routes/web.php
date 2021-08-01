@@ -36,6 +36,7 @@ $router->group(['prefix' => 'api'], function () use ($router) {
             $router->post('create-food', ['uses' => 'MealController@createFood']);
             $router->post('add', ['uses' => 'MealController@addMeal']);
             $router->get('food-types', ['uses' => 'MealController@getFoodTypes']);
+            $router->get('get-food/{id}', ['uses' => 'MealController@getSingleFood']);
         });
     });
     /*
