@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "50a565671724924dacdd1974a4d3fcce",
+    "content-hash": "761a60fd3d2210b4c414ce2732dc2b9c",
     "packages": [
         {
             "name": "apility/laravel-fcm",
@@ -2365,16 +2365,16 @@
         },
         {
             "name": "illuminate/session",
-            "version": "v8.33.1",
+            "version": "v8.54.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/illuminate/session.git",
-                "reference": "452a6fe623bfaea90b2a462d834eeb0019ec66d5"
+                "reference": "6af8c7dc0314eac98d86b8b84e9aa34bf4c9c3d9"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/illuminate/session/zipball/452a6fe623bfaea90b2a462d834eeb0019ec66d5",
-                "reference": "452a6fe623bfaea90b2a462d834eeb0019ec66d5",
+                "url": "https://api.github.com/repos/illuminate/session/zipball/6af8c7dc0314eac98d86b8b84e9aa34bf4c9c3d9",
+                "reference": "6af8c7dc0314eac98d86b8b84e9aa34bf4c9c3d9",
                 "shasum": ""
             },
             "require": {
@@ -2417,7 +2417,7 @@
                 "issues": "https://github.com/laravel/framework/issues",
                 "source": "https://github.com/laravel/framework"
             },
-            "time": "2020-12-08T17:15:16+00:00"
+            "time": "2021-08-03T13:30:49+00:00"
         },
         {
             "name": "illuminate/support",

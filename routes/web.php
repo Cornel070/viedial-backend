@@ -32,18 +32,22 @@ $router->group(['prefix' => 'api'], function () use ($router) {
 
         // Meal Planning
         $router->group(['prefix' => 'meal'], function () use ($router) {
-            //Food types and Items
+            // Meal/Food types and Items
             $router->post('create-food', ['uses' => 'MealController@createFood']);
             $router->post('add', ['uses' => 'MealController@addMeal']);
             $router->get('food-types', ['uses' => 'MealController@getFoodTypes']);
             $router->get('get-food/{id}', ['uses' => 'MealController@getSingleFood']);
+            $router->post('food/{id}/update', ['uses' => 'MealController@editFood']);
+            $router->get('/food/item/{id}/destroy', ['uses' => 'MealController@destroyFoodItem']);
+            $router->get('/food/{id}/destroy', ['uses' => 'MealController@destroyFood']);
+            $router->post('/tag', ['uses' => 'MealController@addMealTags']);
         });
     });
     /*
         (Admin Access) Routes Ends
     */
 
-
+        
     // Authentication Routes
     $router->group(['prefix' => 'auth'], function () use ($router) {
         $router->post('login', ['uses' => 'AuthController@login']);
@@ -59,6 +63,8 @@ $router->group(['prefix' => 'api'], function () use ($router) {
     $router->group(['prefix' => 'risk'], function () use ($router) {
         $router->get('intro-questions', ['uses' => 'RiskController@introQuestions']);
         $router->get('get-assessment', ['uses' => 'RiskController@checkScenarios']);
+        $router->get('get-question', ['uses' => 'RiskController@getQuestion']);
+        $router->post('analyze-risk', ['uses' => 'RiskController@analyzeRisk']);
         $router->post('check-risk', ['uses' => 'RiskController@checkRisk']);
     });
 

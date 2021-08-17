@@ -11,6 +11,7 @@ use App\Models\FoodSelection;
 use App\Models\MealTracker;
 use Carbon\Carbon;
 use App\Models\MealSummary;
+use App\Models\Tag;
 
 class MealController extends Controller
 {
@@ -169,6 +170,72 @@ class MealController extends Controller
         return response()->json(['res_type'=>'success', 'suggested_meals'=>$suggestedMeals]);
     }
 
+    public function editFood(Request $request, $id)
+    {
+        $food_type = FoodType::find($id);
+        if ($request->title) {
+            $food_type->title = $request->title;
+            $food_type->save();
+        }
+
+        $items_ids       = explode(',', $request['food_items_ids']);
+        $names          = explode(',', $request['names']);
+        $calorie_counts = explode(',', $request['calorie_counts']);
+        $carb_counts    = explode(',', $request['carb_counts']);
+        foreach ($items_ids as $key => $value) {
+            $item = FoodItem::find($items_ids[$key]);
+
+            $item->name          = $names[$key] ? $names[$key] : $item->name;
+
+            $item->calorie_count = $calorie_counts[$key] 
+            ? 
+            $calorie_counts[$key] : $item->calorie_count;
+
+            $item->carb_count    = $carb_counts[$key] 
+            ? 
+            $carb_counts[$key] : $item->carb_count;
+
+            $item->save();
+        }
+
+        if ($request->new_names) {
+            $this->saveNewItems($request, $id);
+        }
+
+        return response()->json(['res_type'=>'success', 'message'=>'Updated']);
+    }
+
+    public function saveNewItems(Request $request, $id)
+    {
+        $new_names          = explode(',', $request['new_names']);
+        $new_calorie_counts = explode(',', $request['new_calorie_counts']);
+        $new_carb_counts    = explode(',', $request['new_carb_counts']);
+
+        $itemsArr = [];
+        foreach ($new_names as $key => $value) {
+            array_push($itemsArr, [
+                'food_type_id' => $id,
+                'name'         => $new_names[$key],
+                'calorie_count'=> $new_calorie_counts[$key],
+                'carb_count'   => $new_carb_counts[$key],
+            ]);
+        }
+
+        for ($i = 0; $i < count($itemsArr); $i++) { 
+            FoodItem::updateOrCreate($itemsArr[$i]);
+        }
+
+        return true;
+    }
+
+    public function destroyFoodItem($id)
+    {
+        $item = FoodItem::find($id);
+        $item->delete();
+
+        return response()->json(['res_type'=>'success']);
+    }
+
     private function makeSuggestion($meal_type)
     {
         $user_food_items = $this->user->foodItems;
@@ -313,5 +380,35 @@ class MealController extends Controller
     {
         $summary = MealSummary::where('user_id', $this->user->id)->get();
         return response()->json(['res_type'=>'success', 'summary'=>$summary]);
+    }
+
+    public function destroyFood($id)
+    {
+        $food = FoodType::find($id);
+        if ($food->delete()) {
+            return response()->json(['res_type' => 'success']);
+        }
+        return response()->json(['res_type'=> 'error']);
+    }
+
+    public function addMealTags(Request $request)
+    {
+        $validator = validator()->make($request->all(),[
+            'name' => 'required|string',
+        ],[
+            'name.required'=>'The tag name is required',
+            'name.string'  =>'The tag name must be a valid text',
+        ]);
+
+        if ($validator->fails())
+        {
+            return response()->json(['success'=>false,'errors'=>$validator->errors()->all()]);
+        }
+        foreach ($request['tags'] as $key => $value) {
+            $tag = new Tag;
+            $tag->name = $request['tags'][$key];
+            $tag->save();
+        }
+        return response()->json(['res_type'=>'success']);
     }
 }

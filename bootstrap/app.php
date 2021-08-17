@@ -54,6 +54,14 @@ $app->singleton(
     App\Console\Kernel::class
 );
 
+$app->singleton(Illuminate\Session\SessionManager::class, function () use ($app) {
+    return $app->loadComponent('session', Illuminate\Session\SessionServiceProvider::class, 'session');
+});
+
+$app->singleton('session.store', function () use ($app) {
+    return $app->loadComponent('session', Illuminate\Session\SessionServiceProvider::class, 'session.store');
+});
+
 /*
 |--------------------------------------------------------------------------
 | Register Config Files
@@ -89,6 +97,7 @@ $app->alias('mailer', Illuminate\Contracts\Mail\MailQueue::class);
 $app->middleware([
     // App\Http\Middleware\Cors::class
     Fruitcake\Cors\HandleCors::class,
+    \Illuminate\Session\Middleware\StartSession::class,
 ]);
 
 $app->routeMiddleware([

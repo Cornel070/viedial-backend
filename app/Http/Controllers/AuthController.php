@@ -55,11 +55,11 @@ class AuthController extends Controller
             return response()->json(['res_type'=> 'validator_error', 'errors'=>$validator->errors()->all()], 422);
         }
 
-        //Comment out until testing is done
-        // if($this->emailIsNotUnique($request->email)){
-        //     $notUnique['email_not_unique'] = 'This email has already been taken'; 
-        //     return response()->json(['res_type'=> 'validator_error', 'errors'=>$notUnique], 422);
-        // }
+        // Comment out until testing is done
+        if($this->emailIsNotUnique($request->email)){
+            $notUnique['email_not_unique'] = 'This email has already been taken'; 
+            return response()->json(['res_type'=> 'validator_error', 'errors'=>$notUnique], 422);
+        }
 
         $annon_name = $this->generateAnnon();
 
@@ -77,9 +77,14 @@ class AuthController extends Controller
 
         $user = User::create($data);
 
-        $this->verifyEmail($user);
+        // $this->verifyEmail($user);
 
-        return response()->json(['res_type'=> 'success', 'name'=>$user->name, 'id'=>$user->id], 200);
+        return response()->json([
+            'res_type'  => 'success', 
+            'name'      => $user->name, 
+            'id'        => $user->id,
+            'email'     => $user->email,
+        ]);
     }
 
     private function emailIsNotUnique($email)

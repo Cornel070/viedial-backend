@@ -13,7 +13,8 @@ class Meal extends Model
         'prepare_type',
         'prepare_text',
         'prepare_url',
-        'meal_img'
+        'meal_img',
+        'tags'
     ];
 
     public function items()
