@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\Question;
 use App\Models\Option;
+use App\Models\BothQuestion;
 
 /**
  * 
@@ -82,7 +83,7 @@ class RiskController extends Controller
                 break;
 
             case ($hypertension == 'yes' && $diabetes == 'no'):
-                return $this->getQuestions('diabetes');
+                return $this->getQuestions('both');
                 break;
 
             case ($hypertension == 'no' && $diabetes == 'no'):
@@ -98,6 +99,9 @@ class RiskController extends Controller
     public function getQuestions($type)
     {
         $questions = Question::where('question_type', $type)->get();
+        if ($type == 'both') {
+            $questions = BothQuestion::where('question_type', 'cvd')->get();
+        }
 
         $qts = [];
 
@@ -112,8 +116,10 @@ class RiskController extends Controller
 
         if ($type === 'diabetes') {
             $assessment_type = 'diabetes';
-        }else{
+        }elseif($type == 'cvd'){
             $assessment_type = 'hypertension';
+        }else{
+            $assessment_type = 'both';
         }
 
         return response()->json(['res_type'=> 'success', 'assessment_type'=> $assessment_type, 'questions'=>$questions]);
@@ -124,6 +130,14 @@ class RiskController extends Controller
         $next  = request()->next;
         $type = request()->test_type == 'diabetes' ? 'diabetes' : 'cvd';
         $question = Question::where('question_type', $type)->where('indicator', $next)->first();
+
+        if (request()->test_type == 'both') {
+            if ($next == 10) {
+                $next = 17;
+            }
+            $question = BothQuestion::where('question_type', request()->tag)->where('indicator', $next)->first();
+        }
+
         if (!$question) {
             return response()->json(['res_type'=>'done']);
         }
@@ -143,6 +157,22 @@ class RiskController extends Controller
         }
 
         return $this->checkRisk($score, $gender, $assessment, $bmi);
+    }
+
+    public function analyzeBothRisk(Request $request)
+    {
+        $score = 0;
+        $bmi = 0;
+        $gender = '';
+        $assessment = $request->test_type;
+        list($dbScore, $bmi, $gender) = $this->calculateDiabetesScore($request);
+        list($cvdScore, $bmi, $gender) = $this->calculateCVDScore($request);
+
+        return response()->json([
+            'res_type' => 'both',
+            'db'       => $this->checkRisk($dbScore, $gender, 'diabetes', $bmi),
+            'cvd'      => $this->checkRisk($cvdScore, $gender, 'hypertension', $bmi)
+        ]);
     }
 
     public function calculateDiabetesScore(Request $request)

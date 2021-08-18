@@ -72,18 +72,21 @@ class AuthController extends Controller
             'gender'    => $request->gender,
             'annon_name'=> $annon_name,
             'program'   => $request->program,
-            'status'    => 'inactive'
+            'status'    => 'inactive',
+            'current_bmi'=> $request->bmi,
+            'height'    =>  $request->height
         ];
 
         $user = User::create($data);
 
-        // $this->verifyEmail($user);
+        $this->verifyEmail($user);
 
         return response()->json([
             'res_type'  => 'success', 
             'name'      => $user->name, 
             'id'        => $user->id,
             'email'     => $user->email,
+            'program'   => $request->program
         ]);
     }
 

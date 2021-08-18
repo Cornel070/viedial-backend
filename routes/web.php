@@ -65,6 +65,7 @@ $router->group(['prefix' => 'api'], function () use ($router) {
         $router->get('get-assessment', ['uses' => 'RiskController@checkScenarios']);
         $router->get('get-question', ['uses' => 'RiskController@getQuestion']);
         $router->post('analyze-risk', ['uses' => 'RiskController@analyzeRisk']);
+        $router->post('analyze-both-risk', ['uses' => 'RiskController@analyzeBothRisk']);
         $router->post('check-risk', ['uses' => 'RiskController@checkRisk']);
     });
 
