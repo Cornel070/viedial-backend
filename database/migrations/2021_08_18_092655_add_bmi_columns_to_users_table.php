@@ -14,8 +14,8 @@ class AddBmiColumnsToUsersTable extends Migration
     public function up()
     {
         Schema::table('users', function (Blueprint $table) {
-            $table->string('height');
-            $table->string('current_bmi');
+            $table->float('height');
+            $table->float('current_bmi');
         });
     }
 

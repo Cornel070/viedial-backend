@@ -2,16 +2,14 @@
 <h1>Email verification code</h1>
 	Dear {{$name}}, <br/><br/>
 	To finish setting up your Viedial account, we just need to make sure this email address is yours.<br>
-	To verify your email address, please use the verification code below:
+	To verify your email address, please click on the verification button below:
 
-@component('mail::panel')
-<div style="text-align: center; font-size: 20px; font-weight: bold;">
-	<h2>{{ $code }}</h2>
-</div>
+@component('mail::button', ['url' => $url])
+Verify
 @endcomponent
 
-If you didn't request this code, you can safely ignore this email. Someone else might have typed your email address by mistake.
+If you didn't carry out this action, you can safely ignore this email.
 
 Thanks,<br>
-Viedial
+Viedial Healthcare
 @endcomponent

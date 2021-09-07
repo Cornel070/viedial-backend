@@ -108,7 +108,6 @@ class RiskController extends Controller
         foreach ($questions as $qst) {
             $q = [
                 'question' => $qst->question_text,
-                'options'  => $qst->options
             ];
 
             array_push($q, $qts); 

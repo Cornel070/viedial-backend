@@ -52,13 +52,13 @@ class AuthController extends Controller
 
         if ($validator->fails())
         {
-            return response()->json(['res_type'=> 'validator_error', 'errors'=>$validator->errors()->all()], 422);
+            return response()->json(['res_type'=> 'validator_error', 'errors'=>$validator->errors()->all()]);
         }
 
         // Comment out until testing is done
         if($this->emailIsNotUnique($request->email)){
             $notUnique['email_not_unique'] = 'This email has already been taken'; 
-            return response()->json(['res_type'=> 'validator_error', 'errors'=>$notUnique], 422);
+            return response()->json(['res_type'=> 'validator_error', 'errors'=>$notUnique]);
         }
 
         $annon_name = $this->generateAnnon();
@@ -170,10 +170,10 @@ class AuthController extends Controller
             $token = auth()->login($user);
             $this->welcomeToViedial($user);
 
-            return response()->json(['res_type'=> 'success', 'user'=>$user, 'token'=>$token], 200);
+            return redirect('https://viedial.com/verified');
         }
 
-        return response()->json(['res_type'=> 'error', 'message'=>'Invalid verification code'], 400);
+        return response()->json(['res_type'=> 'error', 'message'=>'Invalid verification code']);
     }
 
     private function welcomeToViedial(User $user)

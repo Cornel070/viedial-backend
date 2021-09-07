@@ -86,6 +86,7 @@ $router->group(['prefix' => 'api'], function () use ($router) {
             $router->post('save-reading', ['uses' => 'TeleMonitoringController@saveReading']);
             $router->get('today-readings', ['uses' => 'TeleMonitoringController@todayReadings']);
             $router->get('all-readings', ['uses' => 'TeleMonitoringController@allReadings']);
+            $router->get('readings-summary/{period}', ['uses' => 'TeleMonitoringController@readingsSummary']); //#########
         });
 
 

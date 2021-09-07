@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\Telemonitoring;
 use Carbon\Carbon;
+use App\Models\RemoteMonitoring;
 
 class TeleMonitoringController extends Controller
 {
@@ -26,26 +27,30 @@ class TeleMonitoringController extends Controller
 
     	$reading_type = $request->reading_type;
 
-    	$tele_record = Telemonitoring::whereDate('created_at', Carbon::today())
-    									->where('user_id', $this->user->id)
-    									->first();
-    	if (!$tele_record) {
-    		$tele_record = new Telemonitoring;
-    		$tele_record->user_id = $this->user->id;
-    	}
+    	// $tele_record = Telemonitoring::whereDate('created_at', Carbon::today())
+    	// 								->where('user_id', $this->user->id)
+    	// 								->first();
+    	// if (!$tele_record) {
+    	// 	$tele_record = new Telemonitoring;
+    	// 	$tele_record->user_id = $this->user->id;
+    	// }
 
     	switch ($reading_type) {
     		case 'blood_pressure':
-    			return $this->saveBPRecord($request, $tele_record);
+    			return $this->saveBPRecord($request);
     			break;
 
     		case 'blood_sugar':
-    			return $this->saveBSRecord($request, $tele_record);
+    			return $this->saveBSRecord($request);
     			break;
 
     		case 'weight':
-    			return $this->saveWeightRecord($request, $tele_record);
+    			return $this->saveWeightRecord($request);
     			break;
+
+            case 'waist_line':
+                return $this->saveWaistlineRecord($request);
+                break;
     		
     		default:
     			return response()->json(['res_type'=> 'error', 'message'=>'Reading type not found.']);
@@ -64,7 +69,7 @@ class TeleMonitoringController extends Controller
         ], $msg);
     }
 
-    private function saveBPRecord(Request $request, Telemonitoring $record)
+    private function saveBPRecord(Request $record)
     {
         $validator = $this->validateBPReading($request);
 
@@ -73,32 +78,38 @@ class TeleMonitoringController extends Controller
             return response()->json(['res_type'=> 'validator_error', 'errors'=>$validator->errors()->all()]);
         }
 
-    	$record->blood_pressure_systolic = $request->systolic;
-    	$record->blood_pressure_diastolic= $request->diastolic;
-    	$record->save();
+        $reading = new RemoteMonitoring;
+        $reading->type = 'blood_pressure';
+        $reading->systolic = $record->blood_pressure_systolic;
+        $reading->diastolic = $record->blood_pressure_diastolic;
+        $reading->user_id = $this->user->id;
+
+        $level = 'Normal';
+        $msg = 'Your blood pressure is on a normal levels.';
 
     	if ($record->blood_pressure_systolic <= 120 && $record->blood_pressure_diastolic <= 80) {
     		$level = 'Normal';
             $msg = 'Your blood pressure is on a normal levels.';
-
-    	}elseif ($record->blood_pressure_systolic >= 120 && $record->blood_pressure_systolic < 141 && $record->blood_pressure_diastolic >= 80 && $record->blood_pressure_diastolic < 91) {
+    	}elseif ($record->blood_pressure_systolic >= 121 && $record->blood_pressure_systolic < 141 && $record->blood_pressure_diastolic >= 81 && $record->blood_pressure_diastolic < 91) {
             $level = 'Slightly High';
             $msg = 'Your blood pressure is slightly high. You need to watch it.';
 
-    	}elseif ($record->blood_pressure_systolic >= 140 && $record->blood_pressure_systolic < 151 && $record->blood_pressure_diastolic >= 90 && $record->blood_pressure_diastolic < 101) {
+    	}elseif ($record->blood_pressure_systolic >= 141 && $record->blood_pressure_systolic < 151 && $record->blood_pressure_diastolic >= 91 && $record->blood_pressure_diastolic < 101) {
             $level = 'Really High';
             $msg = 'Your blood pressure is really high. You need to talk to your doctor about starting or changing your treatment.';
 
-        }elseif ($record->blood_pressure_systolic >= 150 && $record->blood_pressure_systolic < 161 && $record->blood_pressure_diastolic >= 99 && $record->blood_pressure_diastolic < 111) {
+        }elseif ($record->blood_pressure_systolic >= 151 && $record->blood_pressure_systolic < 161 && $record->blood_pressure_diastolic >= 100 && $record->blood_pressure_diastolic < 111) {
             $level = 'Dangerously High';
             $msg = 'Your blood pressure is dangerously high. You need urgent treatment to prevent it from increasing.';
 
-        }elseif ($record->blood_pressure_systolic >= 159 && $record->blood_pressure_diastolic >= 110) {
+        }elseif ($record->blood_pressure_systolic > 160 && $record->blood_pressure_diastolic > 110) {
             $level = 'Very High';
             $msg = 'Your blood pressure has reached very dangerous levels. This can cause a complication that will lead to significant health problems or death. You need to see a doctor immediately.';
 
         }
 
+        $reading->level = $level;
+        $reading->save();
     	return response()->json(['res_type'=> 'success', 'level'=>$level, 'message'=>$msg]);
     }
 
@@ -116,7 +127,7 @@ class TeleMonitoringController extends Controller
         ], $msg);
     }
 
-    public function saveBSRecord(Request $request, Telemonitoring $record)
+    public function saveBSRecord(Request $request)
     {
         $validator = $this->validateBSReading($request);
 
@@ -125,22 +136,29 @@ class TeleMonitoringController extends Controller
             return response()->json(['res_type'=> 'validator_error', 'errors'=>$validator->errors()->all()]);
         }
 
-    	$reading_val = $request->bs_unit === 'mmol/l' ? $request->reading_val : $this->checkConvertUnit($request->reading_val);
-        $record->blood_sugar = $reading_val;
-        $record->save();
+        $reading = new RemoteMonitoring;
+        $reading->type = 'blood_sugar';
 
-        if ($reading_val < 4.2 && $reading_val > 3.4) {
+    	$reading_val = $request->bs_unit === 'mmol/l' ? $request->reading_val : $this->checkConvertUnit($request->reading_val);
+        $reading->blood_sugar_val = $reading_val;
+        $reading->timing = $request->bs_type;
+        $reading->user_id = $this->user->id;
+
+        $level = 'Low';
+        $msg = 'Your blood sugar is getting low. You may need to eat or adjust your medication to prevent it from getting lower.';
+
+        if (!$request->bs_type && $reading_val > 3.4 && $reading_val < 4.2) {
             $level = 'Low';
             $msg = 'Your blood sugar is getting low. You may need to eat or adjust your medication to prevent it from getting lower.';
         }
 
-        if ($reading_val < 3.5) {
+        if (!$request->bs_type && $reading_val < 3.5) {
             $level = 'Dangerously Low';
             $msg = 'Your blood sugar is getting dangerously low. You will need to take a glass of juice or another sugary drink and adjust your medication to prevent it from getting lower.';
         }
 
-        if ($reading_val > 11.1) {
-            $level = 'very very high';
+        if (!$request->bs_type &&  $reading_val > 11.1) {
+            $level = 'Very very high';
             $msg = 'Your blood sugar is very very high. You need to start or change your medication and also make changes in your diet and physical activity to keep it within normal limits. We will work with you to bring it to normal levels';
         }
 
@@ -155,7 +173,7 @@ class TeleMonitoringController extends Controller
             $msg = 'Your blood sugar is really high and we suggest starting or changing your medications and also make needed changes in your diet and physical activity. We are happy to keep working with you until we get to a normal level.';
         }
 
-        if ($request->bs_type === 'before_meal' && $reading_val > 4.1 && $reading_val < 6) {
+        if ($request->bs_type === 'before_meal' && $reading_val >= 4.2 && $reading_val < 6) {
             $level = 'Normal';
             $msg = 'Your blood sugar is within normal range. Keep it up.';
         }elseif ($request->bs_type === 'before_meal' && $reading_val > 5.9 && $reading_val < 6.9) {
@@ -166,7 +184,7 @@ class TeleMonitoringController extends Controller
             $msg = 'Your blood sugar is really high and we suggest starting or changing your medications and also make needed changes in your diet and physical activity. We are happy to keep working with you until we get to a normal level.';
         }
 
-        if ($request->bs_type === '2h_after_meal' && $reading_val > 4.1 && $reading_val < 7.9) {
+        if ($request->bs_type === '2h_after_meal' && $reading_val >= 4.2 && $reading_val < 7.9) {
             $level = 'Normal';
             $msg = 'You had no blood sugar spike after the meal. Keep it up.';
         }elseif ($request->bs_type === '2h_after_meal' && $reading_val > 7.8 && $reading_val < 8.4) {
@@ -177,7 +195,7 @@ class TeleMonitoringController extends Controller
             $msg = 'There is a high spike after the meal. We will work with you to prevent this from happening again.';
         }
 
-        if ($request->bs_type === 'bedtime' && $reading_val > 4.1 && $reading_val < 8.6) {
+        if ($request->bs_type === 'bedtime' && $reading_val >= 4.2 && $reading_val < 8.6) {
             $level = 'Normal';
             $msg = 'Your blood sugar reading before bed is fine. Have a sound sleep.';
         }elseif ($request->bs_type === 'bedtime' && $reading_val < 4.2) {
@@ -188,6 +206,8 @@ class TeleMonitoringController extends Controller
             $msg = 'Your blood sugar is high. We will work with you to prevent this from happening often.';
         }
 
+        $reading->level = $level;
+        $reading->save();
         return response()->json(['res_type'=> 'success', 'level'=>$level, 'message'=>$msg]);
     }
 
@@ -220,16 +240,35 @@ class TeleMonitoringController extends Controller
             return response()->json(['res_type'=> 'validator_error', 'errors'=>$validator->errors()->all()]);
         }
 
-    	$weight = $request->w_unit === 'kg' ? $request->reading_val : $this->poundToKg($request->reading_val);
-        $record->weight = $weight;
-        $record->save();
+        $reading = new RemoteMonitoring;
+        $reading->type = 'weight';
 
-        if ($record->weight <= $this->user->goal()->target_weight) {
-            $this->user->goal()->status = 'completed';
-            return response()->json(['res_type'=> 'success', 'message'=>'Well done! You have met your weight goal']);
+        $weight = $request->w_unit === 'kg' ? $request->reading_val : $this->poundToKg($request->reading_val);
+        $reading->user_id = $this->user->id;
+        $reading->weight_val = $weight;
+        $reading->save();
+
+        if ($this->user->goal()) {
+            if ($reading->weight_val <= $this->user->goal()->target_weight) {
+                $this->user->goal()->status = 'completed';
+                $this->user->goal()->save();
+                return response()->json(['res_type'=> 'success', 'message'=>'Well done! You have met your weight goal']);
+            }   
         }
 
         return response()->json(['res_type'=> 'success', 'message'=>'Weight saved.']);
+    }
+
+    public function saveWaistlineRecord(Request $request)
+    {
+        $reading = new RemoteMonitoring;
+        $reading->type = 'waist_line';
+
+        $reading->user_id = $this->user->id;
+        $reading->waistline_val = $request->reading_val;
+        $reading->save();
+
+        return response()->json(['res_type'=> 'success', 'message'=>'Waistline reading saved.']);
     }
 
     public function validateWeightReading(Request $request)
@@ -252,21 +291,217 @@ class TeleMonitoringController extends Controller
 
     public function todayReadings(Request $request)
     {
-        $todays = Telemonitoring::whereDate('created_at', Carbon::today())->where('user_id', $this->user->id)->get();
+        $today_readings = [];
 
-        if ($todays->isEmpty()) {
-            return response()->json(['res_type'=> 'not found', 'message'=>'No readings for today'], 404);
+        // Blood Pressure Today 
+        $todays_bp = RemoteMonitoring::whereDate('created_at', Carbon::today())
+                                      ->where('user_id', $this->user->id)
+                                      ->where('type', 'blood_pressure')
+                                      ->latest()
+                                      ->first();
+        if (!$todays_bp) {
+            $today_readings['blood_pressure_systolic'] = null;
+            $today_readings['blood_pressure_diastolic'] = null;
+        }else{
+            $today_readings['blood_pressure_systolic'] = $todays_bp->systolic;
+            $today_readings['blood_pressure_diastolic'] = $todays_bp->diastolic;
         }
-        return response()->json(['res_type'=> 'success', 'todays_readings'=>$todays]);
+
+        // Blood Sugar Today
+        $todays_bs = RemoteMonitoring::whereDate('created_at', Carbon::today())
+                                      ->where('user_id', $this->user->id)
+                                      ->where('type', 'blood_sugar')
+                                      ->latest()
+                                      ->first();
+        if (!$todays_bs) {
+            $today_readings['blood_sugar'] = null;
+        }else{
+            $today_readings['blood_sugar'] = $todays_bs->blood_sugar_val;
+        }
+
+        // Weight Today
+        $todays_weight = RemoteMonitoring::whereDate('created_at', Carbon::today())
+                                      ->where('user_id', $this->user->id)
+                                      ->where('type', 'weight')
+                                      ->latest()
+                                      ->first();
+        if (!$todays_weight) {
+            $today_readings['weight'] = null;
+        }else{
+            $today_readings['weight'] = $todays_weight->weight_val;
+        }
+
+        return response()->json(['res_type'=> 'success', 'todays_readings'=>$today_readings]);
     }
 
     public function allReadings()
     {
-        $readings = Telemonitoring::where('user_id', $this->user->id)->latest()->get();
+        $readings = [];
 
-        if ($readings->isEmpty()) {
-            return response()->json(['res_type'=> 'not found', 'message'=>'No readings found'], 404);
+        $bp_readings = RemoteMonitoring::where('user_id', $this->user->id)
+                                        ->where('type', 'blood_pressure')
+                                        ->latest()
+                                        ->get();
+        $bs_readings = RemoteMonitoring::where('user_id', $this->user->id)
+                                        ->where('type', 'blood_sugar')
+                                        ->latest()
+                                        ->get();
+        $weight_readings = RemoteMonitoring::where('user_id', $this->user->id)
+                                        ->where('type', 'weight')
+                                        ->latest()
+                                        ->get();
+        $waistline_readings = RemoteMonitoring::where('user_id', $this->user->id)
+                                        ->where('type', 'waist_line')
+                                        ->latest()
+                                        ->get();
+        $readings['blood_pressure'] = $bp_readings;
+        $readings['blood_sugar'] = $bs_readings;
+        $readings['weight'] = $weight_readings;
+        $readings['waist_line'] = $waistline_readings;
+        if (empty($readings)) {
+            return response()->json(['res_type'=> 'not found', 'message'=>'No readings found']);
         }
         return response()->json(['res_type'=> 'success', 'all_readings'=>$readings]);
+    }
+
+    public function readingsSummary($period)
+    {
+        $summary = [];
+
+        // BP
+        $bps = $this->getReadings($period, 'blood_pressure');
+        $low_bs = 0;
+        $normal_bps = 0;
+        foreach ($bps as $bp) {
+            if ($bp->level != 'Normal') {
+                $abnormal_bps += 1;
+            }else{
+                $normal_bps += 1
+            }
+        }
+        if ($abnormal_bps === 0) {
+            if ($bps->count() > 1) {
+                $msg = 'All your '.$bps->count().' blood pressure reading(s) for this '.$period.' are normal.'
+            }else{
+                $msg = 'Your blood pressure reading for this '.$period.' is normal.';
+            }
+            $data = [
+                'level' = 'Normal',
+                'message' = $msg
+            ];
+            $summary['blood_pressure'] = $data;
+        }elseif($abnormal_bps > 0){
+            $percentage = $this->getPercentage($abnormal_bps, $bps->count());
+            if ($percentage >= 80) {
+                 $msg = '';
+                if ($bps->count() > 1) {
+                    $msg = 'More than 80% ('.$abnormal_bps.') of your '.$bps->count().' blood pressure readings for this '.$period.' are above normal.';
+                }else{
+                    $msg = 'Your blood pressure reading for this '.$period.' is above normal.';
+                }
+                    $data = [
+                'level' = 'Abnormal',
+                'message' = $msg
+                ];
+                $summary['blood_pressure'] = $data;
+            }else{
+                $msg = '';
+                if ($bps->count() > 1) {
+                    $msg = $normal_bps.' of your '.$bps->count().' blood pressure readings for this '.$period.' are normal.';
+                }else{
+                    $msg = 'Your blood pressure reading for this '.$period.' is normal.';
+                }
+                $data = [
+                'level' = 'Okay',
+                'message' = $msg
+                ];
+                $summary['blood_pressure'] = $data;
+            }
+        }
+
+        // BS
+        $blood_sugars = $this->getReadings($period, 'blood_sugar');
+        $abnormal_bs = 0;
+        $normal_bs = 0;
+
+        foreach ($blood_sugars as $bs) {
+            if ($bs->level == 'Normal') {
+                $normal_bs += 1;
+            }else{
+                $abnormal_bs += 1;
+            }
+        }
+        if ($abnormal_bps === 0) {
+            if ($blood_sugars->count() > 1) {
+                $msg = 'All your '.$blood_sugars->count().' blood sugar reading(s) for this '.$period.' are normal.'
+            }else{
+                $msg = 'Your blood sugar reading for this '.$period.' is normal.';
+            }
+            $data = [
+                'level' = 'Normal',
+                'message' = $msg
+            ];
+            $summary['blood_sugar'] = $data;
+        }elseif($abnormal_bs > 0){
+            $percentage = $this->getPercentage($abnormal_bs, $blood_sugars->count());
+            if ($percentage >= 80) {
+                 $msg = '';
+                if ($blood_sugars->count() > 1) {
+                    $msg = 'More than 80% ('.$abnormal_bs.') of your '.$blood_sugars->count().' blood sugar readings for this '.$period.' are abonormal.';
+                }else{
+                    $msg = 'Your blood sugar reading for this '.$period.' is abnormal.';
+                }
+                $data = [
+                'level' = 'Abnormal',
+                'message' = $msg
+                ];
+                $summary['blood_sugar'] = $data;
+            }else{
+                $msg = '';
+                if ($blood_sugars->count() > 1) {
+                    $msg = $normal_bs.' of your '.$blood_sugars->count().' blood sugar readings for this '.$period.' are normal.';
+                }else{
+                    $msg = 'Your blood sugar reading for this '.$period.' is normal.';
+                }
+                $data = [
+                'level' = 'Okay',
+                'message' = $msg
+                ];
+                $summary['blood_sugar'] = $data;
+            }
+        }
+
+        return response()->json(['res_type'=>'success', 'summary'=>$summary]);
+    }
+
+    public function getReadings($period, $type)
+    {
+        switch ($period) {
+            case 'week':
+                return RemoteMonitoring::whereBetween('created_at', [
+                        Carbon::now()->startOfWeek(), 
+                        Carbon::now()->endOfWeek()
+                    ])->where('user_id', $this->user->id)->where('type', $type)->get();
+            break;
+
+            case 'month':
+                return RemoteMonitoring::whereBetween('created_at', [
+                        Carbon::now()->startOfMonth(), 
+                        Carbon::now()->endOfMonth()
+                    ])->where('user_id', $this->user->id)->where('type', $type)->get();
+            break;
+            
+            default:
+                return RemoteMonitoring::whereBetween('created_at', [
+                        Carbon::now()->startOfWeek(), 
+                        Carbon::now()->endOfWeek()
+                    ])->where('user_id', $this->user->id)->where('type', $type)->get();
+                break;
+        }
+    }
+
+    public function getPercentage($part, $whole)
+    {
+        return (int) ceil(($part * 100) / $whole);
     }
 }
