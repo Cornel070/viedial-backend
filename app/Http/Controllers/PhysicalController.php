@@ -28,15 +28,19 @@ class PhysicalController extends Controller
             return response()->json(['res_type'=> 'validator_error', 'errors'=>$validator->errors()->all()], 422);
         }
 
-        $series = new PhyCategory;
-        $series->title = $request->title;
-        $series->save();
+        $serie = new PhyCategory;
 
-        if ($request->has('videos')) {
-            $this->saveVidoes($request, $series->id, true);
+        if ((int) $request->phy_id > 0) {
+            $serie = PhyCategory::find($request->phy_id);
+            $serie->update($request->only('title'));
+        }else{
+            $serie = Serie::create($request->only('title'));
         }
 
-        return response()->json(['res_type'=>'success', 'message'=>'Series created']);
+        if ($request->has('videos')) {
+            $this->saveVidoes($request, $serie->id, true);
+        }
+        return response()->json(['res_type'=>'success', 'message'=>'Videos added']);
     }
 
     public function validateSeries(Request $request)
@@ -60,7 +64,7 @@ class PhysicalController extends Controller
             array_push($vidArr, [
                 'phy_category_id' => $series_id,
                 'title'    => $request['titles'][$key],
-                'workout_url'=> env('PUBLIC_DIR').'assets/vids/phy/'.$vidName,
+                'workout_url'=> asset('assets/vids/phy/'.$vidName),
             ]);
         }
 
@@ -74,6 +78,11 @@ class PhysicalController extends Controller
         }
 
         return response()->json(['res_type'=>'success', 'message'=>'Video added']);
+    }
+
+    public function getActivity($id)
+    {
+        return response()->json(['res_type'=>'success', 'phy'=>PhyCategory::find($id)]);
     }
 
     public function index()
@@ -355,7 +364,7 @@ class PhysicalController extends Controller
             $this->user->goal()->calorie_burned_this_week = 0;
             $this->user->goal()->save();
 
-            return response()->json(['res_type'=>'success', 'message'=>'Well done! You have met your weekly calorie goal.'])
+            return response()->json(['res_type'=>'success', 'message'=>'Well done! You have met your weekly calorie goal.']);
         }
 
         return response()->json(['res_type'=>'success', 'message'=>'Workout done']);
@@ -371,7 +380,7 @@ class PhysicalController extends Controller
             //reset weekly burn
             $this->user->goal()->calorie_burned_this_week = 0;
             $this->user->goal()->save();
-            return response()->json(['res_type'=>'success', 'message'=>'Well done! You have met your weekly calorie goal.'])
+            return response()->json(['res_type'=>'success', 'message'=>'Well done! You have met your weekly calorie goal.']);
         }
 
         return response()->json(['res_type'=>'success', 'message'=>'Workouts done']);
@@ -417,5 +426,12 @@ class PhysicalController extends Controller
         }
 
         return response()->json(['res_type'=>'success', 'message'=>'Workouts undone']);
+    }
+
+    public function destroyWorkout($id)
+    {
+        $workout = Workout::find($id);
+        $workout->delete();
+        return response()->json(['res_type'=>'success']);
     }
 }

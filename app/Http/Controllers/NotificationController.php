@@ -13,6 +13,7 @@ use LaravelFCM\Message\PayloadDataBuilder;
 use LaravelFCM\Message\PayloadNotificationBuilder;
 use FCM;
 use App\Models\User;
+use App\Models\RemoteMonitoring;
 
 class NotificationController extends Controller
 {
@@ -34,16 +35,45 @@ class NotificationController extends Controller
 
         $teleData = [];
 
-    	if ($tele) {
-            if (!$tele->blood_pressure_systolic) {
+        $count = 0;
+
+        // Blood Pressure Today 
+        $todays_bp = RemoteMonitoring::whereDate('created_at', Carbon::today())
+                                      ->where('user_id', $this->user->id)
+                                      ->where('type', 'blood_pressure')
+                                      ->latest()
+                                      ->first();
+        if (!$todays_bp) {
+            $count++;
+        }
+
+        // Blood Sugar Today
+        $todays_bs = RemoteMonitoring::whereDate('created_at', Carbon::today())
+                                      ->where('user_id', $this->user->id)
+                                      ->where('type', 'blood_sugar')
+                                      ->latest()
+                                      ->first();
+        if (!$todays_bs) {
+            $count++;
+        }
+
+        // Weight Today
+        $todays_weight = RemoteMonitoring::whereDate('created_at', Carbon::today())
+                                      ->where('user_id', $this->user->id)
+                                      ->where('type', 'weight')
+                                      ->latest()
+                                      ->first();
+
+    	if ($count > 0 && $count < 3) {
+            if (!$todays_bp->systolic) {
                 $data = collect(["title"=>"Telemonitoring", "description"=>"You have not entered your blood pressure reading for today"]);
                 array_push($summary, $data);
             }
-            if (!$tele->blood_sugar) {
+            if (!$todays_bs->blood_sugar_val) {
                 $data = collect(["title"=>"Telemonitoring", "description"=>"You have not entered your blood sugar reading for today"]);
                 array_push($summary, $data);
             }
-            if (!$tele->weight) {
+            if (!$todays_weight->weight_val) {
                 $data = collect(["title"=>"Telemonitoring", "description"=>"You have not entered your weight reading for today"]);
                 array_push($summary, $data);
             }
@@ -51,7 +81,7 @@ class NotificationController extends Controller
             // if (count($teleData) > 0) {
             //     $summary['Telemonitoring'] = $teleData;
             // }
-        }else{
+        }elseif ($count == 3){
             // array_push($teleData, "You have not entered any of your readings today");
             // $summary['Telemonitoring'] = $teleData;
             $data = collect(["title"=>"Telemonitoring", "description"=>"You have not entered any of your readings today"]);

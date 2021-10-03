@@ -71,7 +71,7 @@ class TeleMonitoringController extends Controller
 
     private function saveBPRecord(Request $record)
     {
-        $validator = $this->validateBPReading($request);
+        $validator = $this->validateBPReading($record);
 
         if ($validator->fails())
         {
@@ -80,33 +80,34 @@ class TeleMonitoringController extends Controller
 
         $reading = new RemoteMonitoring;
         $reading->type = 'blood_pressure';
-        $reading->systolic = $record->blood_pressure_systolic;
-        $reading->diastolic = $record->blood_pressure_diastolic;
+        $reading->systolic = $record->systolic;
+        $reading->diastolic = $record->diastolic;
         $reading->user_id = $this->user->id;
 
-        $level = 'Normal';
-        $msg = 'Your blood pressure is on a normal levels.';
+        $level = 'Slightly High';
+        $msg = 'Your blood pressure is slightly high. You need to watch it.';
 
-    	if ($record->blood_pressure_systolic <= 120 && $record->blood_pressure_diastolic <= 80) {
+    	if ($record->systolic <= 120 && $record->diastolic <= 80) {
     		$level = 'Normal';
-            $msg = 'Your blood pressure is on a normal levels.';
-    	}elseif ($record->blood_pressure_systolic >= 121 && $record->blood_pressure_systolic < 141 && $record->blood_pressure_diastolic >= 81 && $record->blood_pressure_diastolic < 91) {
+            $msg = 'Your blood pressure is on a normal level';
+    	}elseif (($record->systolic >= 121 && $record->systolic < 141) && ($record->diastolic >= 81 && $record->diastolic < 91)) {
             $level = 'Slightly High';
             $msg = 'Your blood pressure is slightly high. You need to watch it.';
 
-    	}elseif ($record->blood_pressure_systolic >= 141 && $record->blood_pressure_systolic < 151 && $record->blood_pressure_diastolic >= 91 && $record->blood_pressure_diastolic < 101) {
+    	}elseif (($record->systolic >= 141 && $record->systolic < 151) && ($record->diastolic >= 91 && $record->diastolic < 101)) {
             $level = 'Really High';
             $msg = 'Your blood pressure is really high. You need to talk to your doctor about starting or changing your treatment.';
 
-        }elseif ($record->blood_pressure_systolic >= 151 && $record->blood_pressure_systolic < 161 && $record->blood_pressure_diastolic >= 100 && $record->blood_pressure_diastolic < 111) {
+        }elseif ($record->systolic >= 151 && $record->diastolic >= 100) {
             $level = 'Dangerously High';
-            $msg = 'Your blood pressure is dangerously high. You need urgent treatment to prevent it from increasing.';
-
-        }elseif ($record->blood_pressure_systolic > 160 && $record->blood_pressure_diastolic > 110) {
-            $level = 'Very High';
-            $msg = 'Your blood pressure has reached very dangerous levels. This can cause a complication that will lead to significant health problems or death. You need to see a doctor immediately.';
+            $msg = 'Your blood pressure is dangerously high. You need urgent treatment to prevent it from increasing';
 
         }
+        // elseif ($record->systolic > 160 && $record->diastolic > 110) {
+        //     $level = 'Very High';
+        //     $msg = 'Your blood pressure has reached very dangerous levels. This can cause a complication that will lead to significant health problems or death. You need to see a doctor immediately.';
+
+        // }
 
         $reading->level = $level;
         $reading->save();
@@ -147,22 +148,30 @@ class TeleMonitoringController extends Controller
         $level = 'Low';
         $msg = 'Your blood sugar is getting low. You may need to eat or adjust your medication to prevent it from getting lower.';
 
-        if (!$request->bs_type && $reading_val > 3.4 && $reading_val < 4.2) {
+        if (strtolower($request->bs_type) == 'random' && $reading_val > 3.4 && $reading_val <= 4.2) {
             $level = 'Low';
             $msg = 'Your blood sugar is getting low. You may need to eat or adjust your medication to prevent it from getting lower.';
         }
 
-        if (!$request->bs_type && $reading_val < 3.5) {
+        if (strtolower($request->bs_type) == 'random' && $reading_val < 3.5) {
             $level = 'Dangerously Low';
-            $msg = 'Your blood sugar is getting dangerously low. You will need to take a glass of juice or another sugary drink and adjust your medication to prevent it from getting lower.';
+            $msg = 'Your blood sugar is getting dangerously low. You will need to take a glass of juice or another sugary drink and reduce your medication to prevent it from getting lower.';
         }
 
-        if (!$request->bs_type &&  $reading_val > 11.1) {
+        if (strtolower($request->bs_type) == 'random' && $reading_val > 4.2 && $reading_val <= 11.1) {
+            $level = 'Normal';
+            $msg = 'Your blood sugar is within normal range. Keep it up';
+        }
+
+        if (strtolower($request->bs_type) == 'random' &&  $reading_val > 11.1) {
             $level = 'Very very high';
             $msg = 'Your blood sugar is very very high. You need to start or change your medication and also make changes in your diet and physical activity to keep it within normal limits. We will work with you to bring it to normal levels';
         }
-
-        if ($request->bs_type === 'first_wake' && $reading_val > 4.1 && $reading_val < 5.7) {
+        if ($request->bs_type === 'first_wake' && $reading_val < 4) {
+            $level = 'Dangerously Low';
+            $msg = 'Your blood sugar is getting dangerously low. You will need to take a glass of juice or another sugary drink and reduce your medication to prevent it from getting lower';
+        }
+        elseif ($request->bs_type === 'first_wake' && $reading_val > 4 && $reading_val < 5.7) {
             $level = 'Normal';
             $msg = 'Your blood sugar is within normal range. Keep it up';
         }elseif ($request->bs_type === 'first_wake' && $reading_val > 5.6 && $reading_val < 7) {
@@ -190,17 +199,17 @@ class TeleMonitoringController extends Controller
         }elseif ($request->bs_type === '2h_after_meal' && $reading_val > 7.8 && $reading_val < 8.4) {
             $level = 'Slightly High';
             $msg = 'There is a slight spike after the meal. We will work with you to avoid this from happening all the time.';
-        }elseif ($request->bs_type === '2h_after_meal' && $reading_val > 8.5) {
+        }elseif ($request->bs_type === '2h_after_meal' && $reading_val >= 8.5) {
             $level = 'Very High';
             $msg = 'There is a high spike after the meal. We will work with you to prevent this from happening again.';
         }
 
-        if ($request->bs_type === 'bedtime' && $reading_val >= 4.2 && $reading_val < 8.6) {
-            $level = 'Normal';
-            $msg = 'Your blood sugar reading before bed is fine. Have a sound sleep.';
-        }elseif ($request->bs_type === 'bedtime' && $reading_val < 4.2) {
+        if ($request->bs_type === 'bedtime' && $reading_val < 4.2) {
             $level = 'Low';
             $msg = 'Your blood sugar is low. Have a high fiber snack before bed.';
+        }elseif ($request->bs_type === 'bedtime' && $reading_val >= 4.2 && $reading_val <= 8.5) {
+            $level = 'Normal';
+            $msg = 'Your blood sugar reading before bed is fine. Have a sound sleep.';
         }elseif ($request->bs_type === 'bedtime' && $reading_val > 8.5) {
             $level = 'High';
             $msg = 'Your blood sugar is high. We will work with you to prevent this from happening often.';
@@ -231,7 +240,7 @@ class TeleMonitoringController extends Controller
         return (int) $val / 18; //convert mg/dl to mmol/l
     }
 
-    public function saveWeightRecord(Request $request, Telemonitoring $record)
+    public function saveWeightRecord(Request $request)
     {
         $validator = $this->validateWeightReading($request);
 
@@ -265,7 +274,7 @@ class TeleMonitoringController extends Controller
         $reading->type = 'waist_line';
 
         $reading->user_id = $this->user->id;
-        $reading->waistline_val = $request->reading_val;
+        $reading->waist_line_val = $request->reading_val;
         $reading->save();
 
         return response()->json(['res_type'=> 'success', 'message'=>'Waistline reading saved.']);
@@ -340,21 +349,27 @@ class TeleMonitoringController extends Controller
 
         $bp_readings = RemoteMonitoring::where('user_id', $this->user->id)
                                         ->where('type', 'blood_pressure')
+                                        ->select('type', 'level', 'systolic', 'diastolic', 'created_at')
                                         ->latest()
                                         ->get();
         $bs_readings = RemoteMonitoring::where('user_id', $this->user->id)
                                         ->where('type', 'blood_sugar')
+                                        ->select('type', 'blood_sugar_val', 'timing', 'level', 'created_at')
                                         ->latest()
                                         ->get();
         $weight_readings = RemoteMonitoring::where('user_id', $this->user->id)
                                         ->where('type', 'weight')
+                                        ->select('type', 'weight_val', 'created_at')
                                         ->latest()
                                         ->get();
         $waistline_readings = RemoteMonitoring::where('user_id', $this->user->id)
                                         ->where('type', 'waist_line')
+                                        ->select('type', 'waist_line_val', 'created_at')
                                         ->latest()
                                         ->get();
-        $readings['blood_pressure'] = $bp_readings;
+        $readings['blood_pressure'] = $bp_readings->filter(function ($value, $key) {
+                                        return $value != null;
+                                    });
         $readings['blood_sugar'] = $bs_readings;
         $readings['weight'] = $weight_readings;
         $readings['waist_line'] = $waistline_readings;
@@ -366,108 +381,127 @@ class TeleMonitoringController extends Controller
 
     public function readingsSummary($period)
     {
-        $summary = [];
+        $summary = '';
 
         // BP
         $bps = $this->getReadings($period, 'blood_pressure');
-        $low_bs = 0;
-        $normal_bps = 0;
-        foreach ($bps as $bp) {
-            if ($bp->level != 'Normal') {
-                $abnormal_bps += 1;
-            }else{
-                $normal_bps += 1
-            }
-        }
-        if ($abnormal_bps === 0) {
-            if ($bps->count() > 1) {
-                $msg = 'All your '.$bps->count().' blood pressure reading(s) for this '.$period.' are normal.'
-            }else{
-                $msg = 'Your blood pressure reading for this '.$period.' is normal.';
-            }
+        if ($bps->count() < 1) {
             $data = [
-                'level' = 'Normal',
-                'message' = $msg
+                'level' => 'Normal',
+                'message' => 'No blood pressure readings entered for this '.$period
             ];
-            $summary['blood_pressure'] = $data;
-        }elseif($abnormal_bps > 0){
-            $percentage = $this->getPercentage($abnormal_bps, $bps->count());
-            if ($percentage >= 80) {
-                 $msg = '';
-                if ($bps->count() > 1) {
-                    $msg = 'More than 80% ('.$abnormal_bps.') of your '.$bps->count().' blood pressure readings for this '.$period.' are above normal.';
+            $summary .= 'No blood pressure readings entered for this '.$period.' & ';
+        }else{
+            $abnormal_bps = 0;
+            $normal_bps = 0;
+            foreach ($bps as $bp) {
+                if ($bp->level != 'Normal') {
+                    $abnormal_bps += 1;
                 }else{
-                    $msg = 'Your blood pressure reading for this '.$period.' is above normal.';
+                    $normal_bps += 1;
                 }
-                    $data = [
-                'level' = 'Abnormal',
-                'message' = $msg
-                ];
-                $summary['blood_pressure'] = $data;
-            }else{
-                $msg = '';
+            }
+
+            if ($abnormal_bps === 0) {
                 if ($bps->count() > 1) {
-                    $msg = $normal_bps.' of your '.$bps->count().' blood pressure readings for this '.$period.' are normal.';
+                    $msg = 'All your '.$bps->count().' blood pressure readings for this '.$period.' are normal & ';
                 }else{
-                    $msg = 'Your blood pressure reading for this '.$period.' is normal.';
+                    $msg = 'Your blood pressure reading for this '.$period.' is normal & ';
                 }
                 $data = [
-                'level' = 'Okay',
-                'message' = $msg
+                    'level' => 'Normal',
+                    'message' => $msg
                 ];
-                $summary['blood_pressure'] = $data;
+                $summary .= $msg;
+            }elseif($abnormal_bps > 0){
+                $percentage = $this->getPercentage($abnormal_bps, $bps->count());
+                if ($percentage >= 80) {
+                     $msg = '';
+                    if ($bps->count() > 1) {
+                        $msg = 'Most of your ('.$abnormal_bps.') '.$bps->count().' blood pressure readings for this '.$period.' are higher than normal and you need to step up your treatment and care & ';
+                    }else{
+                        $msg = 'Your blood pressure reading for this '.$period.' is above normal & ';
+                    }
+                        $data = [
+                    'level' => 'Abnormal',
+                    'message' => $msg 
+                    ];
+                    $summary .= $msg;
+                }else{
+                    $msg = '';
+                    if ($bps->count() > 1) {
+                        $msg = $normal_bps.' of your '.$bps->count().' blood pressure readings for this '.$period.' are normal & ';
+                    }else{
+                        $msg = 'Your blood pressure reading for this '.$period.' is normal & ';
+                    }
+                    $data = [
+                    'level' => 'Okay',
+                    'message' => $msg
+                    ];
+                    $summary .= $msg;
+                }
             }
         }
 
         // BS
         $blood_sugars = $this->getReadings($period, 'blood_sugar');
-        $abnormal_bs = 0;
-        $normal_bs = 0;
-
-        foreach ($blood_sugars as $bs) {
-            if ($bs->level == 'Normal') {
-                $normal_bs += 1;
-            }else{
-                $abnormal_bs += 1;
-            }
-        }
-        if ($abnormal_bps === 0) {
-            if ($blood_sugars->count() > 1) {
-                $msg = 'All your '.$blood_sugars->count().' blood sugar reading(s) for this '.$period.' are normal.'
-            }else{
-                $msg = 'Your blood sugar reading for this '.$period.' is normal.';
-            }
+        
+        if ($blood_sugars->count() < 1) {
             $data = [
-                'level' = 'Normal',
-                'message' = $msg
+                'level' => 'Normal',
+                'message' => 'No blood sugar readings entered for this '.$period
             ];
-            $summary['blood_sugar'] = $data;
-        }elseif($abnormal_bs > 0){
-            $percentage = $this->getPercentage($abnormal_bs, $blood_sugars->count());
-            if ($percentage >= 80) {
-                 $msg = '';
-                if ($blood_sugars->count() > 1) {
-                    $msg = 'More than 80% ('.$abnormal_bs.') of your '.$blood_sugars->count().' blood sugar readings for this '.$period.' are abonormal.';
+            $summary .= 'no blood sugar readings entered for this '.$period.'.';
+        }else{
+            $abnormal_bs = 0;
+            $normal_bs = 0;
+
+            foreach ($blood_sugars as $bs) {
+                if ($bs->level == 'Normal') {
+                    $normal_bs += 1;
                 }else{
-                    $msg = 'Your blood sugar reading for this '.$period.' is abnormal.';
+                    $abnormal_bs += 1;
+                }
+            }
+
+            if ($abnormal_bs === 0) {
+                if ($blood_sugars->count() > 1) {
+                    $msg = 'all your '.$blood_sugars->count().' blood sugar reading(s) for this '.$period.' are normal.';
+                }else{
+                    $msg = 'your blood sugar reading for this '.$period.' is normal.';
                 }
                 $data = [
-                'level' = 'Abnormal',
-                'message' = $msg
+                    'level' => 'Normal',
+                    'message' => $msg
                 ];
-                $summary['blood_sugar'] = $data;
-            }else{
-                $msg = '';
-                if ($blood_sugars->count() > 1) {
-                    $msg = $normal_bs.' of your '.$blood_sugars->count().' blood sugar readings for this '.$period.' are normal.';
+                $summary .= $msg;
+            }elseif($abnormal_bs > 0){
+                $percentage = $this->getPercentage($abnormal_bs, $blood_sugars->count());
+                if ($percentage >= 80) {
+                     $msg = '';
+                    if ($blood_sugars->count() > 1) {
+                        $msg = 'more than 80% ('.$abnormal_bs.') of your '.$blood_sugars->count().' blood sugar readings for this '.$period.' are abonormal.';
+                    }else{
+                        $msg = 'your blood sugar reading for this '.$period.' is abnormal.';
+                    }
+                    $data = [
+                    'level' => 'Abnormal',
+                    'message' => $msg
+                    ];
+                    $summary .= $msg;
                 }else{
-                    $msg = 'Your blood sugar reading for this '.$period.' is normal.';
+                    $msg = '';
+                    if ($blood_sugars->count() > 1) {
+                        $msg = $normal_bs.' of your '.$blood_sugars->count().' blood sugar readings for this '.$period.' are normal.';
+                    }else{
+                        $msg = 'your blood sugar reading for this '.$period.' is normal.';
+                    }
+                    $data = [
+                    'level' => 'Okay',
+                    'message' => $msg
+                    ];
+                    $summary .= $msg;
                 }
-                $data = [
-                'level' = 'Okay',
-                'message' = $msg
-                ];
-                $summary['blood_sugar'] = $data;
             }
         }
 
@@ -503,5 +537,11 @@ class TeleMonitoringController extends Controller
     public function getPercentage($part, $whole)
     {
         return (int) ceil(($part * 100) / $whole);
+    }
+
+    public function emailReadingsSummary($period)
+    {
+        // create emailing script later
+        return response()->json(['res_type'=>'success', 'message'=>'A detailed summary of your readings for this '.$period.' has been sent to your email - '.$this->user->email]);
     }
 }

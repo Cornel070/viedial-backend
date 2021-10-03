@@ -22,12 +22,15 @@ $router->group(['prefix' => 'api'], function () use ($router) {
         $router->group(['prefix' => 'edu'], function () use ($router) {
             $router->post('create-series', ['uses' => 'EduController@createSeries']);
             $router->post('series/{series_id}/video', ['uses' => 'EduController@saveVidoes']);
+            $router->get('serie/{id}', ['uses' => 'EduController@getSerie']);
         });
 
         // Physical Activity 
         $router->group(['prefix' => 'phy'], function () use ($router) {
             $router->post('create-series', ['uses' => 'PhysicalController@createSeries']);
             $router->post('series/{series_id}/video', ['uses' => 'PhysicalController@saveVidoes']);
+            $router->get('{id}', ['uses' => 'PhysicalController@getActivity']);
+            $router->get('destroy-workout/{id}', ['uses' => 'PhysicalController@destroyWorkout']);
         });
 
         // Meal Planning
@@ -87,6 +90,7 @@ $router->group(['prefix' => 'api'], function () use ($router) {
             $router->get('today-readings', ['uses' => 'TeleMonitoringController@todayReadings']);
             $router->get('all-readings', ['uses' => 'TeleMonitoringController@allReadings']);
             $router->get('readings-summary/{period}', ['uses' => 'TeleMonitoringController@readingsSummary']); //#########
+            $router->get('mail-readings-summary/{period}', ['uses' => 'TeleMonitoringController@emailReadingsSummary']);
         });
 
 

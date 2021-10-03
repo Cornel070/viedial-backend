@@ -9,6 +9,7 @@ use App\Models\WorkoutTracker;
 use App\Models\Goal;
 use App\Models\Telemonitoring;
 use App\Models\Workout;
+use App\Models\RemoteMonitoring;
 
 class UpdateController extends Controller
 {
@@ -52,11 +53,40 @@ class UpdateController extends Controller
             Telemonitoring
         */
 
-        $daily_readings = Telemonitoring::whereDate('created_at', Carbon::today())
-                                         ->where('user_id', $this->user->id)
-                                         ->select('blood_pressure_systolic', 'blood_pressure_diastolic', 'blood_sugar', 'weight')
-                                         ->first();
-        if (!$daily_readings) {
+        //record incomplete action
+        $count = 0;
+
+        // Blood Pressure Today 
+        $todays_bp = RemoteMonitoring::whereDate('created_at', Carbon::today())
+                                      ->where('user_id', $this->user->id)
+                                      ->where('type', 'blood_pressure')
+                                      ->latest()
+                                      ->first();
+        if (!$todays_bp) {
+            $count++;
+        }
+
+        // Blood Sugar Today
+        $todays_bs = RemoteMonitoring::whereDate('created_at', Carbon::today())
+                                      ->where('user_id', $this->user->id)
+                                      ->where('type', 'blood_sugar')
+                                      ->latest()
+                                      ->first();
+        if (!$todays_bs) {
+            $count++;
+        }
+
+        // Weight Today
+        $todays_weight = RemoteMonitoring::whereDate('created_at', Carbon::today())
+                                      ->where('user_id', $this->user->id)
+                                      ->where('type', 'weight')
+                                      ->latest()
+                                      ->first();
+        if (!$todays_weight) {
+            $count++;
+        }
+
+        if ($count == 3) {
             $tele_data = [
                 'blood_pressure_systolic'   => 0,
                 'blood_pressure_diastolic'  => 0,
@@ -72,30 +102,27 @@ class UpdateController extends Controller
             ];
 
             array_push($incomplete, $data);
-        }else{
-            $tele_data = $daily_readings;
+        }elseif ($count > 0) {
+            $tele_data = [
+                'blood_pressure_systolic'  => $todays_bp->systolic,
+                'blood_pressure_diastolic' => $todays_bp->diastolic,
+                'blood_sugar'              => $todays_bs->blood_sugar_val,
+                'weight'                   => $todays_weight->weight_val
+            ];
 
-            //record incomplete action
-            $count = 0;
-            if (!$daily_readings->blood_pressure_systolic) {
-                $count++;
-            }
-
-            if (!$daily_readings->blood_sugar) {
-                $count++;
-            }
-            if (!$daily_readings->weight) {
-                $count++;
-            }
-
-            if ($count > 0) {
-                $data = [
-                    'type' => 'telemonitoring',
-                    'count' => $count,
-                    'message'=> 'Reading(s) not entered'
-                ];
-                array_push($incomplete, $data);
-            }
+            $data = [
+                'type' => 'telemonitoring',
+                'count' => $count,
+                'message'=> 'Reading(s) not entered'
+            ];
+            array_push($incomplete, $data);
+        }elseif ($count == 0) {
+            $tele_data = [
+                'blood_pressure_systolic'  => $todays_bp->systolic,
+                'blood_pressure_diastolic' => $todays_bp->diastolic,
+                'blood_sugar'              => $todays_bs->blood_sugar_val,
+                'weight'                   => $todays_weight->weight_val
+            ];
         }
 
         $dash_data['daily_readings'] = $tele_data;

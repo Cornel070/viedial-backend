@@ -27,10 +27,14 @@ class EduController extends Controller
             return response()->json(['res_type'=> 'validator_error', 'errors'=>$validator->errors()->all()], 422);
         }
 
-        $series = new Serie;
-        $series->title = $request->title;
-        $series->category = $request->category;
-        $series->save();
+        $serie = new Serie;
+
+        if ((int) $request->series_id > 0) {
+            $serie = Serie::find($series_id);
+            $serie->update($request->only('title', 'category'));
+        }else{
+            $serie = Serie::create($request->only('title', 'category'));
+        }
 
         if ($request->has('videos')) {
             $this->saveVidoes($request, $series->id, true);
@@ -51,7 +55,13 @@ class EduController extends Controller
         return validator()->make($request->all(), [
             'title' => 'required|string',
             'category' => 'required|string',
+            'videos'=>'required|array'
         ],$msg);
+    }
+
+    public function getSerie($id)
+    {
+        return response()->json(['res_type'=>'success', 'serie'=>Serie::find($id)]);
     }
 
     public function saveVidoes(Request $request, $series_id, $w = false)
