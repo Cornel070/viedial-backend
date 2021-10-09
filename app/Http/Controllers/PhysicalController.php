@@ -434,4 +434,11 @@ class PhysicalController extends Controller
         $workout->delete();
         return response()->json(['res_type'=>'success']);
     }
+
+    public function destroyPhysicalActivity($id)
+    {
+        $phy = PhyCategory::find($id);
+        $phy->delete();
+        return response()->json(['res_type'=>'success']);
+    }
 }

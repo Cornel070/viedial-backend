@@ -23,6 +23,7 @@ $router->group(['prefix' => 'api'], function () use ($router) {
             $router->post('create-series', ['uses' => 'EduController@createSeries']);
             $router->post('series/{series_id}/video', ['uses' => 'EduController@saveVidoes']);
             $router->get('serie/{id}', ['uses' => 'EduController@getSerie']);
+            $router->get('destroy-edu/{id}', ['uses' => 'EduController@destroyCurriculum']);
         });
 
         // Physical Activity 
@@ -31,6 +32,7 @@ $router->group(['prefix' => 'api'], function () use ($router) {
             $router->post('series/{series_id}/video', ['uses' => 'PhysicalController@saveVidoes']);
             $router->get('{id}', ['uses' => 'PhysicalController@getActivity']);
             $router->get('destroy-workout/{id}', ['uses' => 'PhysicalController@destroyWorkout']);
+            $router->get('destroy-phy/{id}', ['uses' => 'PhysicalController@destroyPhysicalActivity']);
         });
 
         // Meal Planning
