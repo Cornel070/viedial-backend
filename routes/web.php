@@ -58,10 +58,10 @@ $router->group(['prefix' => 'api'], function () use ($router) {
         $router->post('login', ['uses' => 'AuthController@login']);
         $router->post('register', ['uses' => 'AuthController@register']);
         $router->get('verify/{code}', ['uses' => 'AuthController@verifyFromEmail']);
-        $router->get('key/{key}/check', ['uses' => 'AuthController@checkAcctKey']); //forgot password
-        $router->post('update-password', ['uses' => 'AuthController@updatePassword']); //forgot password
-        $router->get('check-token', ['uses' => 'AuthController@checkToken']);//check if token has expired
-        $router->get('users', ['uses' => 'AuthController@getUsers']);//All details (For test purpose only: don't deploy to live)
+        $router->get('key/{key}/check', ['uses' => 'AuthController@checkAcctKey']); // forgot password
+        $router->post('update-password', ['uses' => 'AuthController@updatePassword']); // forgot password
+        $router->get('check-token', ['uses' => 'AuthController@checkToken']); // check if token has expired
+        $router->get('users', ['uses' => 'AuthController@getUsers']); // All details (For test purpose only: don't deploy to live)
     });
 
     // Risk Assessment Routes

@@ -35,7 +35,7 @@ class VerifyEmail extends Mailable
     {
         return $this->from('info@viedial.com', 'Viedial Healthcare')
                 ->markdown('emails.verify', [
-                    'url' => 'https://viedial.com?verified=1',
+                    'url' => 'https://app.viedial.com/api/auth/verify/'.$this->verifyCode,
                     'name' => $this->name,
                 ]);
     }

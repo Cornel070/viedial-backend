@@ -91,71 +91,87 @@ class EduController extends Controller
 
     public function index()
     {
-    	$category = strtolower($this->user->program);
+    	// $category = strtolower($this->user->program);
 
-    	switch ($category) {
-    		case 'diabetes':
-    			$lecture_series = [];
-    			$series = Serie::where('category', 'diabetes')->get();
-    			foreach ($series as $serie) {
-    				$data = [
-    					'id'		=> $serie->id,
-    					'title' 	=> $serie->title,
-    					'category'	=> 'Type 2 Diabetes',
-                        'intro_vid' => $serie->intro_vid,
-    					'videos_count'	=> $serie->videos->count(),
-    					'likes'		=> $serie->likes,
-    					'dislikes'	=> $serie->dislikes,
-    					'comments_count'  => $serie->comments->count(),
-                        'created_at'      => $serie->created_at,
-    				];
-    				array_push($lecture_series, $data);
-    			}
-    			return response()->json(['res_type'=>'success', 'series'=>$lecture_series]);
-    			break;
-    		case 'hypertension':
-    			$lecture_series = [];
-    			$series = Serie::where('category', 'hypertension')->get();
-    			foreach ($series as $serie) {
-    				$data = [
-    					'id'		=> $serie->id,
-    					'title' 	=> $serie->title,
-    					'category'	=> 'Hypertension',
-                        'intro_vid' => $serie->intro_vid,
-    					'videos_count'	=> $serie->videos->count(),
-    					'likes'		=> $serie->likes,
-    					'dislikes'	=> $serie->dislikes,
-    					'comments_count'  => $serie->comments->count(),
-                        'created_at'      => $serie->created_at,
-    				];
-    				array_push($lecture_series, $data);
-    			}
-    			return response()->json(['res_type'=>'success', 'series'=>$lecture_series]);
-    			break;
-    		case 'co-morbidity':
-    			$lecture_series = [];
-    			$series = Serie::where('category', 'diabetes')->get();
-    			foreach ($series as $serie) {
-    				$data = [
-    					'id'		=> $serie->id,
-    					'title' 	=> $serie->title,
-    					'category'	=> $serie->category === 'diabetes'?'Type 2 Diabetes':'Hypertension',
-                        'intro_vid' => $serie->intro_vid,
-    					'videos_count'	=> $serie->videos->count(),
-    					'likes'		=> $serie->likes,
-    					'dislikes'	=> $serie->dislikes,
-    					'comments_count'  => $serie->comments->count(),
-                        'created_at'      => $serie->created_at,
-    				];
-    				array_push($lecture_series, $data);
-    			}
-    			return response()->json(['res_type'=>'success', 'series'=>$lecture_series]);
-    			break;
+    	// switch ($category) {
+    	// 	case 'diabetes':
+    	// 		$lecture_series = [];
+    	// 		$series = Serie::where('category', 'diabetes')->get();
+    	// 		foreach ($series as $serie) {
+    	// 			$data = [
+    	// 				'id'		=> $serie->id,
+    	// 				'title' 	=> $serie->title,
+    	// 				'category'	=> 'Type 2 Diabetes',
+     //                    'intro_vid' => $serie->intro_vid,
+    	// 				'videos_count'	=> $serie->videos->count(),
+    	// 				'likes'		=> $serie->likes,
+    	// 				'dislikes'	=> $serie->dislikes,
+    	// 				'comments_count'  => $serie->comments->count(),
+     //                    'created_at'      => $serie->created_at,
+    	// 			];
+    	// 			array_push($lecture_series, $data);
+    	// 		}
+    	// 		return response()->json(['res_type'=>'success', 'series'=>$lecture_series]);
+    	// 		break;
+    	// 	case 'hypertension':
+    	// 		$lecture_series = [];
+    	// 		$series = Serie::where('category', 'hypertension')->get();
+    	// 		foreach ($series as $serie) {
+    	// 			$data = [
+    	// 				'id'		=> $serie->id,
+    	// 				'title' 	=> $serie->title,
+    	// 				'category'	=> 'Hypertension',
+     //                    'intro_vid' => $serie->intro_vid,
+    	// 				'videos_count'	=> $serie->videos->count(),
+    	// 				'likes'		=> $serie->likes,
+    	// 				'dislikes'	=> $serie->dislikes,
+    	// 				'comments_count'  => $serie->comments->count(),
+     //                    'created_at'      => $serie->created_at,
+    	// 			];
+    	// 			array_push($lecture_series, $data);
+    	// 		}
+    	// 		return response()->json(['res_type'=>'success', 'series'=>$lecture_series]);
+    	// 		break;
+    	// 	case 'co-morbidity':
+    	// 		$lecture_series = [];
+    	// 		$series = Serie::where('category', 'diabetes')->orWhere('category', 'hypertension')->get();
+    	// 		foreach ($series as $serie) {
+    	// 			$data = [
+    	// 				'id'		=> $serie->id,
+    	// 				'title' 	=> $serie->title,
+    	// 				'category'	=> $serie->category === 'diabetes'?'Type 2 Diabetes':'Hypertension',
+     //                    'intro_vid' => $serie->intro_vid,
+    	// 				'videos_count'	=> $serie->videos->count(),
+    	// 				'likes'		=> $serie->likes,
+    	// 				'dislikes'	=> $serie->dislikes,
+    	// 				'comments_count'  => $serie->comments->count(),
+     //                    'created_at'      => $serie->created_at,
+    	// 			];
+    	// 			array_push($lecture_series, $data);
+    	// 		}
+    	// 		return response()->json(['res_type'=>'success', 'series'=>$lecture_series]);
+    	// 		break;
     		
-    		default:
-    			return response()->json(['res_type'=>'Not found', 'message'=>'User category not detected.'],404);
-    			break;
-    	}
+    	// 	default:
+    	// 		return response()->json(['res_type'=>'Not found', 'message'=>'User category not detected.'],404);
+    	// 		break;
+            $lecture_series = [];
+                $series = Serie::where('category', 'diabetes')->orWhere('category', 'hypertension')->get();
+                foreach ($series as $serie) {
+                    $data = [
+                        'id'        => $serie->id,
+                        'title'     => $serie->title,
+                        'category'  => $serie->category === 'diabetes'?'Type 2 Diabetes':'Hypertension',
+                        'intro_vid' => $serie->intro_vid,
+                        'videos_count'  => $serie->videos->count(),
+                        'likes'     => $serie->likes,
+                        'dislikes'  => $serie->dislikes,
+                        'comments_count'  => $serie->comments->count(),
+                        'created_at'      => $serie->created_at,
+                    ];
+                    array_push($lecture_series, $data);
+                }
+                return response()->json(['res_type'=>'success', 'series'=>$lecture_series]);
     }
 
     public function seriesVideos($id)

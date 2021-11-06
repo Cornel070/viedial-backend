@@ -6,6 +6,8 @@ use Illuminate\Http\Request;
 use App\Models\Telemonitoring;
 use Carbon\Carbon;
 use App\Models\RemoteMonitoring;
+use Illuminate\Support\Facades\Mail;
+use App\Mail\TeleSummary;
 
 class TeleMonitoringController extends Controller
 {
@@ -542,6 +544,10 @@ class TeleMonitoringController extends Controller
     public function emailReadingsSummary($period)
     {
         // create emailing script later
+        $bp_records = $this->getReadings($period, 'blood_pressure');
+        $bs_records = $this->getReadings($period, 'blood_sugar');
+        Mail::to($this->user->email)->send(new TeleSummary($user, $bp_records, $bs_records, $period));
+
         return response()->json(['res_type'=>'success', 'message'=>'A detailed summary of your readings for this '.$period.' has been sent to your email - '.$this->user->email]);
     }
 }
